@@ -1,0 +1,43 @@
+# Documentation folder
+doc/
+
+# Node modules
+node_modules/
+
+# Build outputs
+dist/
+out/
+build/
+
+# Electron
+.webpack/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Coverage
+coverage/
+*.coverage
+
+# Database (local development)
+*.db
+*.db-journal
+
+# Temporary files
+*.tmp
+.cache/
