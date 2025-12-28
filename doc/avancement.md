@@ -147,7 +147,7 @@ CREATE TABLE migrations (
 
 ## EPIC 1 : Partie simple (MVP)
 
-### **DEV-002 : Interface - Écran d'accueil**
+### **✅ DEV-002 : Interface - Écran d'accueil** [TERMINÉ]
 
 **Objectif :** Menu principal avec navigation
 
@@ -1186,10 +1186,10 @@ export default defineConfig({
 ## 🗓️ Priorisation recommandée
 
 ### **Sprint 1 : Foundation (1-2 semaines)**
-- ✅ DEV-000 : Init projet Electron
-- ✅ DEV-001 : Setup DB SQLite
-- ✅ DEV-002 : Écran d'accueil
-- ✅ DEV-017 : CI/CD basique (tests + lint)
+- ✅ DEV-000 : Init projet Electron [TERMINÉ]
+- ✅ DEV-001 : Setup DB SQLite [TERMINÉ]
+- ✅ DEV-002 : Écran d'accueil [TERMINÉ]
+- ⏳ DEV-017 : CI/CD basique (tests + lint) [EN COURS]
 
 ### **Sprint 2 : MVP (2-3 semaines)**
 - ✅ DEV-003 : Config partie 4 joueurs
