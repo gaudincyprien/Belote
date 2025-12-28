@@ -1,5 +1,16 @@
 // Shared TypeScript types and interfaces
 
+// Window API (for Electron IPC)
+export interface ElectronAPI {
+  quit: () => void;
+}
+
+declare global {
+  interface Window {
+    electron?: ElectronAPI;
+  }
+}
+
 export type GameMode = '4_joueurs' | '3_joueurs';
 
 export type TrumpSuit = 'pique' | 'coeur' | 'carreau' | 'trefle' | 'sans_atout' | 'tout_atout';
