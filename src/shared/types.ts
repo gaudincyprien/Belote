@@ -1,8 +1,14 @@
 // Shared TypeScript types and interfaces
 
 // Window API (for Electron IPC)
+export interface CreateGameParams {
+  mode: GameMode;
+  playerNames: string[];
+}
+
 export interface ElectronAPI {
   quit: () => void;
+  createGame?: (params: CreateGameParams) => Promise<number>;
 }
 
 declare global {

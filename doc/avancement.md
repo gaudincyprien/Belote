@@ -172,7 +172,7 @@ CREATE TABLE migrations (
 
 ---
 
-### **DEV-003 : Interface - Configuration de partie**
+### **✅ DEV-003 : Interface - Configuration de partie** [TERMINÉ]
 
 **Objectif :** Choisir mode et joueurs
 
