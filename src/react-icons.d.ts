@@ -8,4 +8,5 @@ declare module 'react-icons/fa' {
   export const FaCog: ComponentType<SVGProps<SVGSVGElement>>;
   export const FaTimes: ComponentType<SVGProps<SVGSVGElement>>;
   export const FaArrowLeft: ComponentType<SVGProps<SVGSVGElement>>;
+  export const FaPlay: ComponentType<SVGProps<SVGSVGElement>>;
 }
