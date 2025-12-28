@@ -6,9 +6,29 @@ export interface CreateGameParams {
   playerNames: string[];
 }
 
+export interface GameData {
+  game: Game;
+  players: Array<{ id: number; nom: string; equipe: number }>;
+  rounds: Round[];
+}
+
+export interface CreateRoundParams {
+  gameId: number;
+  trumpSuit: TrumpSuit;
+  callingTeam: 1 | 2;
+  pointsTeam1: number;
+  pointsTeam2: number;
+  announcementsTeam1: number;
+  announcementsTeam2: number;
+  beloteTeam: 0 | 1 | 2;
+}
+
 export interface ElectronAPI {
   quit: () => void;
   createGame?: (params: CreateGameParams) => Promise<number>;
+  getGame?: (gameId: number) => Promise<GameData>;
+  createRound?: (params: CreateRoundParams) => Promise<Round>;
+  deleteLastRound?: (gameId: number) => Promise<boolean>;
 }
 
 declare global {
