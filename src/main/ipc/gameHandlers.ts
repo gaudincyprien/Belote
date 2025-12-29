@@ -69,6 +69,13 @@ export function registerGameHandlers() {
           gameRepo.addPlayer(gameId, playerIds[0], 1);
           gameRepo.addPlayer(gameId, playerIds[1], 2);
           gameRepo.addPlayer(gameId, playerIds[2], 3);
+
+          // Set individual player names
+          gameRepo.update(gameId, {
+            equipe1_nom: params.playerNames[0],
+            equipe2_nom: params.playerNames[1],
+            equipe3_nom: params.playerNames[2],
+          });
         }
 
         return gameId;
@@ -132,21 +139,30 @@ export function registerGameHandlers() {
           preneur_equipe: params.callingTeam,
           points_equipe1: params.pointsTeam1,
           points_equipe2: params.pointsTeam2,
+          points_equipe3: params.pointsTeam3 || 0,
           annonces_equipe1: params.announcementsTeam1,
           annonces_equipe2: params.announcementsTeam2,
+          annonces_equipe3: params.announcementsTeam3 || 0,
           belote_equipe: params.beloteTeam,
         });
 
         // Calculer les points totaux avec annonces et belote
         const totalTeam1 = params.pointsTeam1 + params.announcementsTeam1 + (params.beloteTeam === 1 ? 20 : 0);
         const totalTeam2 = params.pointsTeam2 + params.announcementsTeam2 + (params.beloteTeam === 2 ? 20 : 0);
+        const totalTeam3 = (params.pointsTeam3 || 0) + (params.announcementsTeam3 || 0) + (params.beloteTeam === 3 ? 20 : 0);
 
         // Mettre à jour les scores cumulés de la partie
         const game = gameRepo.findById(params.gameId)!;
-        gameRepo.update(params.gameId, {
+        const updates: any = {
           score_equipe1: game.score_equipe1 + totalTeam1,
           score_equipe2: game.score_equipe2 + totalTeam2,
-        });
+        };
+
+        if (game.mode === '3_joueurs') {
+          updates.score_equipe3 = (game.score_equipe3 || 0) + totalTeam3;
+        }
+
+        gameRepo.update(params.gameId, updates);
 
         return round;
       })();

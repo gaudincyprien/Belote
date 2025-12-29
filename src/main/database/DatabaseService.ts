@@ -136,6 +136,93 @@ export class DatabaseService {
           `);
         },
       },
+      {
+        version: 2,
+        up: () => {
+          console.log('Migration v2: Adding 3-player mode support...');
+
+          // Add new columns to parties table
+          this.db.exec(`
+            ALTER TABLE parties ADD COLUMN equipe3_nom TEXT;
+          `);
+
+          this.db.exec(`
+            ALTER TABLE parties ADD COLUMN score_equipe3 INTEGER DEFAULT 0;
+          `);
+
+          // Add new columns to manches table
+          this.db.exec(`
+            ALTER TABLE manches ADD COLUMN points_equipe3 INTEGER DEFAULT 0;
+          `);
+
+          this.db.exec(`
+            ALTER TABLE manches ADD COLUMN annonces_equipe3 INTEGER DEFAULT 0;
+          `);
+
+          // Update CHECK constraints for manches table (recreate table)
+          this.db.exec(`
+            -- Create new manches table with updated constraints
+            CREATE TABLE manches_new (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              partie_id INTEGER NOT NULL,
+              numero INTEGER NOT NULL,
+              atout TEXT CHECK(atout IN ('pique', 'coeur', 'carreau', 'trefle', 'sans_atout', 'tout_atout')),
+              preneur_equipe INTEGER CHECK(preneur_equipe IN (1, 2, 3)),
+              points_equipe1 INTEGER NOT NULL,
+              points_equipe2 INTEGER NOT NULL,
+              points_equipe3 INTEGER DEFAULT 0,
+              annonces_equipe1 INTEGER DEFAULT 0,
+              annonces_equipe2 INTEGER DEFAULT 0,
+              annonces_equipe3 INTEGER DEFAULT 0,
+              belote_equipe INTEGER CHECK(belote_equipe IN (0, 1, 2, 3)),
+              timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+              FOREIGN KEY (partie_id) REFERENCES parties(id) ON DELETE CASCADE
+            );
+
+            -- Copy data from old table
+            INSERT INTO manches_new (
+              id, partie_id, numero, atout, preneur_equipe,
+              points_equipe1, points_equipe2, points_equipe3,
+              annonces_equipe1, annonces_equipe2, annonces_equipe3,
+              belote_equipe, timestamp
+            )
+            SELECT
+              id, partie_id, numero, atout, preneur_equipe,
+              points_equipe1, points_equipe2,
+              COALESCE(points_equipe3, 0),
+              annonces_equipe1, annonces_equipe2,
+              COALESCE(annonces_equipe3, 0),
+              belote_equipe, timestamp
+            FROM manches;
+
+            -- Drop old table and rename new one
+            DROP TABLE manches;
+            ALTER TABLE manches_new RENAME TO manches;
+          `);
+
+          // Update CHECK constraints for parties_joueurs table (recreate table)
+          this.db.exec(`
+            -- Create new parties_joueurs table with updated constraints
+            CREATE TABLE parties_joueurs_new (
+              partie_id INTEGER NOT NULL,
+              joueur_id INTEGER NOT NULL,
+              equipe INTEGER CHECK(equipe IN (1, 2, 3)),
+              FOREIGN KEY (partie_id) REFERENCES parties(id) ON DELETE CASCADE,
+              FOREIGN KEY (joueur_id) REFERENCES joueurs(id),
+              PRIMARY KEY (partie_id, joueur_id)
+            );
+
+            -- Copy data from old table
+            INSERT INTO parties_joueurs_new SELECT * FROM parties_joueurs;
+
+            -- Drop old table and rename new one
+            DROP TABLE parties_joueurs;
+            ALTER TABLE parties_joueurs_new RENAME TO parties_joueurs;
+          `);
+
+          console.log('Migration v2: 3-player mode support added successfully');
+        },
+      },
     ];
 
     // Exécuter les migrations non appliquées

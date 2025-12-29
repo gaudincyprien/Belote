@@ -102,9 +102,18 @@ const GameResultsPage: React.FC = () => {
     );
   }
 
-  const winningTeam = statistics.winner === 1 ? 'Équipe A' : 'Équipe B';
-  const winningScore = statistics.winner === 1 ? statistics.finalScores.team1 : statistics.finalScores.team2;
-  const losingScore = statistics.winner === 1 ? statistics.finalScores.team2 : statistics.finalScores.team1;
+  const is3PlayerMode = game.mode === '3_joueurs';
+
+  // Déterminer le gagnant et les scores
+  const winnerName = is3PlayerMode
+    ? (statistics.winner === 1 ? game.equipe1_nom || 'Joueur 1' :
+       statistics.winner === 2 ? game.equipe2_nom || 'Joueur 2' :
+       game.equipe3_nom || 'Joueur 3')
+    : (statistics.winner === 1 ? 'Équipe A' : 'Équipe B');
+
+  const teamName = game.mode === '4_joueurs'
+    ? (statistics.winner === 1 ? game.equipe1_nom : game.equipe2_nom)
+    : null;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
@@ -128,11 +137,21 @@ const GameResultsPage: React.FC = () => {
 
           <div className="text-center mb-6">
             <p className="text-2xl font-bold text-green-600 mb-2">
-              Gagnant : {winningTeam} {game.mode === '4_joueurs' ? `(${statistics.winner === 1 ? game.equipe1_nom : game.equipe2_nom})` : ''}
+              Gagnant : {winnerName} {teamName ? `(${teamName})` : ''}
             </p>
-            <p className="text-xl text-gray-700">
-              Score final : <span className="font-bold">{winningScore}</span> - {losingScore}
-            </p>
+            {is3PlayerMode && statistics.finalScores3 ? (
+              <div className="flex items-center justify-center gap-4 text-xl text-gray-700">
+                <span className="font-bold text-blue-700">{statistics.finalScores3.player1}</span>
+                <span>-</span>
+                <span className="font-bold text-red-700">{statistics.finalScores3.player2}</span>
+                <span>-</span>
+                <span className="font-bold text-green-700">{statistics.finalScores3.player3}</span>
+              </div>
+            ) : (
+              <p className="text-xl text-gray-700">
+                Score final : <span className="font-bold">{statistics.finalScores.team1}</span> - {statistics.finalScores.team2}
+              </p>
+            )}
           </div>
 
           <div className="flex items-center justify-center gap-6 text-gray-600">
@@ -154,20 +173,43 @@ const GameResultsPage: React.FC = () => {
           {/* Répartition des prises */}
           <div className="mb-6 pb-6 border-b border-gray-200">
             <h3 className="text-lg font-semibold text-gray-700 mb-3">Répartition des prises :</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-blue-50 p-4 rounded-xl">
-                <p className="text-blue-800 font-semibold">Équipe A</p>
-                <p className="text-2xl font-bold text-blue-900">
-                  {statistics.roundDistribution.team1.count} manches ({statistics.roundDistribution.team1.percentage}%)
-                </p>
+            {is3PlayerMode && statistics.roundDistribution3 ? (
+              <div className="grid grid-cols-3 gap-4">
+                <div className="bg-blue-50 p-4 rounded-xl">
+                  <p className="text-blue-800 font-semibold">{game.equipe1_nom || 'Joueur 1'}</p>
+                  <p className="text-2xl font-bold text-blue-900">
+                    {statistics.roundDistribution3.player1.count} manches ({statistics.roundDistribution3.player1.percentage}%)
+                  </p>
+                </div>
+                <div className="bg-red-50 p-4 rounded-xl">
+                  <p className="text-red-800 font-semibold">{game.equipe2_nom || 'Joueur 2'}</p>
+                  <p className="text-2xl font-bold text-red-900">
+                    {statistics.roundDistribution3.player2.count} manches ({statistics.roundDistribution3.player2.percentage}%)
+                  </p>
+                </div>
+                <div className="bg-green-50 p-4 rounded-xl">
+                  <p className="text-green-800 font-semibold">{game.equipe3_nom || 'Joueur 3'}</p>
+                  <p className="text-2xl font-bold text-green-900">
+                    {statistics.roundDistribution3.player3.count} manches ({statistics.roundDistribution3.player3.percentage}%)
+                  </p>
+                </div>
               </div>
-              <div className="bg-red-50 p-4 rounded-xl">
-                <p className="text-red-800 font-semibold">Équipe B</p>
-                <p className="text-2xl font-bold text-red-900">
-                  {statistics.roundDistribution.team2.count} manches ({statistics.roundDistribution.team2.percentage}%)
-                </p>
+            ) : (
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-blue-50 p-4 rounded-xl">
+                  <p className="text-blue-800 font-semibold">Équipe A</p>
+                  <p className="text-2xl font-bold text-blue-900">
+                    {statistics.roundDistribution.team1.count} manches ({statistics.roundDistribution.team1.percentage}%)
+                  </p>
+                </div>
+                <div className="bg-red-50 p-4 rounded-xl">
+                  <p className="text-red-800 font-semibold">Équipe B</p>
+                  <p className="text-2xl font-bold text-red-900">
+                    {statistics.roundDistribution.team2.count} manches ({statistics.roundDistribution.team2.percentage}%)
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Atouts joués */}
@@ -204,81 +246,179 @@ const GameResultsPage: React.FC = () => {
           {/* Taux de réussite */}
           <div className="mb-6 pb-6 border-b border-gray-200">
             <h3 className="text-lg font-semibold text-gray-700 mb-3">Taux de réussite (prises gagnées) :</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-blue-50 p-4 rounded-xl">
-                <p className="text-blue-800 font-semibold">Équipe A</p>
-                <p className="text-lg text-blue-900">
-                  {statistics.successRate.team1.successful}/{statistics.successRate.team1.total} réussies ({statistics.successRate.team1.percentage}%)
-                </p>
+            {is3PlayerMode && statistics.successRate3 ? (
+              <div className="grid grid-cols-3 gap-4">
+                <div className="bg-blue-50 p-4 rounded-xl">
+                  <p className="text-blue-800 font-semibold">{game.equipe1_nom || 'Joueur 1'}</p>
+                  <p className="text-lg text-blue-900">
+                    {statistics.successRate3.player1.successful}/{statistics.successRate3.player1.total} réussies ({statistics.successRate3.player1.percentage}%)
+                  </p>
+                </div>
+                <div className="bg-red-50 p-4 rounded-xl">
+                  <p className="text-red-800 font-semibold">{game.equipe2_nom || 'Joueur 2'}</p>
+                  <p className="text-lg text-red-900">
+                    {statistics.successRate3.player2.successful}/{statistics.successRate3.player2.total} réussies ({statistics.successRate3.player2.percentage}%)
+                  </p>
+                </div>
+                <div className="bg-green-50 p-4 rounded-xl">
+                  <p className="text-green-800 font-semibold">{game.equipe3_nom || 'Joueur 3'}</p>
+                  <p className="text-lg text-green-900">
+                    {statistics.successRate3.player3.successful}/{statistics.successRate3.player3.total} réussies ({statistics.successRate3.player3.percentage}%)
+                  </p>
+                </div>
               </div>
-              <div className="bg-red-50 p-4 rounded-xl">
-                <p className="text-red-800 font-semibold">Équipe B</p>
-                <p className="text-lg text-red-900">
-                  {statistics.successRate.team2.successful}/{statistics.successRate.team2.total} réussies ({statistics.successRate.team2.percentage}%)
-                </p>
+            ) : (
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-blue-50 p-4 rounded-xl">
+                  <p className="text-blue-800 font-semibold">Équipe A</p>
+                  <p className="text-lg text-blue-900">
+                    {statistics.successRate.team1.successful}/{statistics.successRate.team1.total} réussies ({statistics.successRate.team1.percentage}%)
+                  </p>
+                </div>
+                <div className="bg-red-50 p-4 rounded-xl">
+                  <p className="text-red-800 font-semibold">Équipe B</p>
+                  <p className="text-lg text-red-900">
+                    {statistics.successRate.team2.successful}/{statistics.successRate.team2.total} réussies ({statistics.successRate.team2.percentage}%)
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Meilleures manches */}
           <div className="mb-6 pb-6 border-b border-gray-200">
             <h3 className="text-lg font-semibold text-gray-700 mb-3">Meilleures manches :</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-blue-50 p-4 rounded-xl">
-                <p className="text-blue-800 font-semibold">Équipe A</p>
-                {statistics.bestRounds.team1 ? (
-                  <p className="text-lg text-blue-900">
-                    {statistics.bestRounds.team1.points} pts (manche #{statistics.bestRounds.team1.roundNumber}, {getTrumpSymbol(statistics.bestRounds.team1.trump)})
-                  </p>
-                ) : (
-                  <p className="text-gray-500">Aucune manche</p>
-                )}
+            {is3PlayerMode && statistics.bestRounds3 ? (
+              <div className="grid grid-cols-3 gap-4">
+                <div className="bg-blue-50 p-4 rounded-xl">
+                  <p className="text-blue-800 font-semibold">{game.equipe1_nom || 'Joueur 1'}</p>
+                  {statistics.bestRounds3.player1 ? (
+                    <p className="text-lg text-blue-900">
+                      {statistics.bestRounds3.player1.points} pts (manche #{statistics.bestRounds3.player1.roundNumber}, {getTrumpSymbol(statistics.bestRounds3.player1.trump)})
+                    </p>
+                  ) : (
+                    <p className="text-gray-500">Aucune manche</p>
+                  )}
+                </div>
+                <div className="bg-red-50 p-4 rounded-xl">
+                  <p className="text-red-800 font-semibold">{game.equipe2_nom || 'Joueur 2'}</p>
+                  {statistics.bestRounds3.player2 ? (
+                    <p className="text-lg text-red-900">
+                      {statistics.bestRounds3.player2.points} pts (manche #{statistics.bestRounds3.player2.roundNumber}, {getTrumpSymbol(statistics.bestRounds3.player2.trump)})
+                    </p>
+                  ) : (
+                    <p className="text-gray-500">Aucune manche</p>
+                  )}
+                </div>
+                <div className="bg-green-50 p-4 rounded-xl">
+                  <p className="text-green-800 font-semibold">{game.equipe3_nom || 'Joueur 3'}</p>
+                  {statistics.bestRounds3.player3 ? (
+                    <p className="text-lg text-green-900">
+                      {statistics.bestRounds3.player3.points} pts (manche #{statistics.bestRounds3.player3.roundNumber}, {getTrumpSymbol(statistics.bestRounds3.player3.trump)})
+                    </p>
+                  ) : (
+                    <p className="text-gray-500">Aucune manche</p>
+                  )}
+                </div>
               </div>
-              <div className="bg-red-50 p-4 rounded-xl">
-                <p className="text-red-800 font-semibold">Équipe B</p>
-                {statistics.bestRounds.team2 ? (
-                  <p className="text-lg text-red-900">
-                    {statistics.bestRounds.team2.points} pts (manche #{statistics.bestRounds.team2.roundNumber}, {getTrumpSymbol(statistics.bestRounds.team2.trump)})
-                  </p>
-                ) : (
-                  <p className="text-gray-500">Aucune manche</p>
-                )}
+            ) : (
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-blue-50 p-4 rounded-xl">
+                  <p className="text-blue-800 font-semibold">Équipe A</p>
+                  {statistics.bestRounds.team1 ? (
+                    <p className="text-lg text-blue-900">
+                      {statistics.bestRounds.team1.points} pts (manche #{statistics.bestRounds.team1.roundNumber}, {getTrumpSymbol(statistics.bestRounds.team1.trump)})
+                    </p>
+                  ) : (
+                    <p className="text-gray-500">Aucune manche</p>
+                  )}
+                </div>
+                <div className="bg-red-50 p-4 rounded-xl">
+                  <p className="text-red-800 font-semibold">Équipe B</p>
+                  {statistics.bestRounds.team2 ? (
+                    <p className="text-lg text-red-900">
+                      {statistics.bestRounds.team2.points} pts (manche #{statistics.bestRounds.team2.roundNumber}, {getTrumpSymbol(statistics.bestRounds.team2.trump)})
+                    </p>
+                  ) : (
+                    <p className="text-gray-500">Aucune manche</p>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Annonces */}
           <div className="mb-6 pb-6 border-b border-gray-200">
             <h3 className="text-lg font-semibold text-gray-700 mb-3">Annonces totales :</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-blue-50 p-4 rounded-xl">
-                <p className="text-blue-800 font-semibold">Équipe A</p>
-                <p className="text-2xl font-bold text-blue-900">{statistics.totalAnnouncements.team1} pts</p>
+            {is3PlayerMode && statistics.totalAnnouncements3 ? (
+              <div className="grid grid-cols-3 gap-4">
+                <div className="bg-blue-50 p-4 rounded-xl">
+                  <p className="text-blue-800 font-semibold">{game.equipe1_nom || 'Joueur 1'}</p>
+                  <p className="text-2xl font-bold text-blue-900">{statistics.totalAnnouncements3.player1} pts</p>
+                </div>
+                <div className="bg-red-50 p-4 rounded-xl">
+                  <p className="text-red-800 font-semibold">{game.equipe2_nom || 'Joueur 2'}</p>
+                  <p className="text-2xl font-bold text-red-900">{statistics.totalAnnouncements3.player2} pts</p>
+                </div>
+                <div className="bg-green-50 p-4 rounded-xl">
+                  <p className="text-green-800 font-semibold">{game.equipe3_nom || 'Joueur 3'}</p>
+                  <p className="text-2xl font-bold text-green-900">{statistics.totalAnnouncements3.player3} pts</p>
+                </div>
               </div>
-              <div className="bg-red-50 p-4 rounded-xl">
-                <p className="text-red-800 font-semibold">Équipe B</p>
-                <p className="text-2xl font-bold text-red-900">{statistics.totalAnnouncements.team2} pts</p>
+            ) : (
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-blue-50 p-4 rounded-xl">
+                  <p className="text-blue-800 font-semibold">Équipe A</p>
+                  <p className="text-2xl font-bold text-blue-900">{statistics.totalAnnouncements.team1} pts</p>
+                </div>
+                <div className="bg-red-50 p-4 rounded-xl">
+                  <p className="text-red-800 font-semibold">Équipe B</p>
+                  <p className="text-2xl font-bold text-red-900">{statistics.totalAnnouncements.team2} pts</p>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Belote/Rebelote */}
           <div>
             <h3 className="text-lg font-semibold text-gray-700 mb-3">Belote/Rebelote :</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-blue-50 p-4 rounded-xl">
-                <p className="text-blue-800 font-semibold">Équipe A</p>
-                <p className="text-lg text-blue-900">
-                  {statistics.beloteCount.team1} fois ({statistics.beloteCount.team1 * 20} pts)
-                </p>
+            {is3PlayerMode && statistics.beloteCount3 ? (
+              <div className="grid grid-cols-3 gap-4">
+                <div className="bg-blue-50 p-4 rounded-xl">
+                  <p className="text-blue-800 font-semibold">{game.equipe1_nom || 'Joueur 1'}</p>
+                  <p className="text-lg text-blue-900">
+                    {statistics.beloteCount3.player1} fois ({statistics.beloteCount3.player1 * 20} pts)
+                  </p>
+                </div>
+                <div className="bg-red-50 p-4 rounded-xl">
+                  <p className="text-red-800 font-semibold">{game.equipe2_nom || 'Joueur 2'}</p>
+                  <p className="text-lg text-red-900">
+                    {statistics.beloteCount3.player2} fois ({statistics.beloteCount3.player2 * 20} pts)
+                  </p>
+                </div>
+                <div className="bg-green-50 p-4 rounded-xl">
+                  <p className="text-green-800 font-semibold">{game.equipe3_nom || 'Joueur 3'}</p>
+                  <p className="text-lg text-green-900">
+                    {statistics.beloteCount3.player3} fois ({statistics.beloteCount3.player3 * 20} pts)
+                  </p>
+                </div>
               </div>
-              <div className="bg-red-50 p-4 rounded-xl">
-                <p className="text-red-800 font-semibold">Équipe B</p>
-                <p className="text-lg text-red-900">
-                  {statistics.beloteCount.team2} fois ({statistics.beloteCount.team2 * 20} pts)
-                </p>
+            ) : (
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-blue-50 p-4 rounded-xl">
+                  <p className="text-blue-800 font-semibold">Équipe A</p>
+                  <p className="text-lg text-blue-900">
+                    {statistics.beloteCount.team1} fois ({statistics.beloteCount.team1 * 20} pts)
+                  </p>
+                </div>
+                <div className="bg-red-50 p-4 rounded-xl">
+                  <p className="text-red-800 font-semibold">Équipe B</p>
+                  <p className="text-lg text-red-900">
+                    {statistics.beloteCount.team2} fois ({statistics.beloteCount.team2 * 20} pts)
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
