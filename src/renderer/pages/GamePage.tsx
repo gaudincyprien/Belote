@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FaArrowLeft, FaCheck, FaTimes, FaTrash } from 'react-icons/fa';
+import { FaArrowLeft, FaCheck, FaTimes, FaTrash, FaUsers } from 'react-icons/fa';
 import type { Game, Round, TrumpSuit, GameData } from '../../shared/types';
 import {
   validateRoundForm,
@@ -12,6 +12,7 @@ import {
 } from '../utils/roundValidation';
 import { DEFAULT_VICTORY_THRESHOLD } from '../../shared/constants';
 import { shouldEndGame } from '../utils/gameStatistics';
+import { getPlayerAuPot, getPlayerAuPotName } from '../utils/rotationUtils';
 
 const GamePage: React.FC = () => {
   const { gameId } = useParams<{ gameId: string }>();
@@ -23,14 +24,16 @@ const GamePage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   // Form state
-  const [callingTeam, setCallingTeam] = useState<1 | 2>(1);
+  const [callingTeam, setCallingTeam] = useState<1 | 2 | 3>(1);
   const [trumpSuit, setTrumpSuit] = useState<TrumpSuit>('pique');
   const [entryMode, setEntryMode] = useState<'2_teams' | '1_team'>('2_teams');
   const [pointsTeam1, setPointsTeam1] = useState<string>('');
   const [pointsTeam2, setPointsTeam2] = useState<string>('');
+  const [pointsTeam3, setPointsTeam3] = useState<string>(''); // NEW - 3-player mode
   const [announcementsTeam1, setAnnouncementsTeam1] = useState<string>('0');
   const [announcementsTeam2, setAnnouncementsTeam2] = useState<string>('0');
-  const [beloteTeam, setBeloteTeam] = useState<0 | 1 | 2>(0);
+  const [announcementsTeam3, setAnnouncementsTeam3] = useState<string>('0'); // NEW - 3-player mode
+  const [beloteTeam, setBeloteTeam] = useState<0 | 1 | 2 | 3>(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Load game data on mount
@@ -118,15 +121,23 @@ const GamePage: React.FC = () => {
       const { team1Points, team2Points } = calculatedPoints;
       const announcements1 = parseInt(announcementsTeam1) || 0;
       const announcements2 = parseInt(announcementsTeam2) || 0;
+      const announcements3 = game.mode === '3_joueurs' ? (parseInt(announcementsTeam3) || 0) : undefined;
+
+      // For 3-player mode, get points directly from inputs
+      const points1 = game.mode === '3_joueurs' ? (parseInt(pointsTeam1) || 0) : team1Points;
+      const points2 = game.mode === '3_joueurs' ? (parseInt(pointsTeam2) || 0) : team2Points;
+      const points3 = game.mode === '3_joueurs' ? (parseInt(pointsTeam3) || 0) : undefined;
 
       const newRound = await window.electron.createRound({
         gameId: game.id,
         trumpSuit,
         callingTeam,
-        pointsTeam1: team1Points,
-        pointsTeam2: team2Points,
+        pointsTeam1: points1,
+        pointsTeam2: points2,
+        pointsTeam3: points3,
         announcementsTeam1: announcements1,
         announcementsTeam2: announcements2,
+        announcementsTeam3: announcements3,
         beloteTeam,
       });
 
@@ -134,13 +145,15 @@ const GamePage: React.FC = () => {
       setRounds([...rounds, newRound]);
 
       // Update game scores
-      const totalTeam1 = team1Points + announcements1 + (beloteTeam === 1 ? 20 : 0);
-      const totalTeam2 = team2Points + announcements2 + (beloteTeam === 2 ? 20 : 0);
+      const totalTeam1 = points1 + announcements1 + (beloteTeam === 1 ? 20 : 0);
+      const totalTeam2 = points2 + announcements2 + (beloteTeam === 2 ? 20 : 0);
+      const totalTeam3 = game.mode === '3_joueurs' ? (points3! + announcements3! + (beloteTeam === 3 ? 20 : 0)) : 0;
 
       const updatedGame = {
         ...game,
         score_equipe1: game.score_equipe1 + totalTeam1,
         score_equipe2: game.score_equipe2 + totalTeam2,
+        ...(game.mode === '3_joueurs' && { score_equipe3: (game.score_equipe3 || 0) + totalTeam3 }),
       };
 
       setGame(updatedGame);
@@ -156,8 +169,10 @@ const GamePage: React.FC = () => {
       // Reset form
       setPointsTeam1('');
       setPointsTeam2('');
+      setPointsTeam3('');
       setAnnouncementsTeam1('0');
       setAnnouncementsTeam2('0');
+      setAnnouncementsTeam3('0');
       setBeloteTeam(0);
     } catch (error) {
       console.error('Error creating round:', error);
@@ -180,12 +195,16 @@ const GamePage: React.FC = () => {
         const lastRound = rounds[rounds.length - 1];
         const totalTeam1 = lastRound.points_equipe1 + lastRound.annonces_equipe1 + (lastRound.belote_equipe === 1 ? 20 : 0);
         const totalTeam2 = lastRound.points_equipe2 + lastRound.annonces_equipe2 + (lastRound.belote_equipe === 2 ? 20 : 0);
+        const totalTeam3 = game.mode === '3_joueurs'
+          ? ((lastRound.points_equipe3 || 0) + (lastRound.annonces_equipe3 || 0) + (lastRound.belote_equipe === 3 ? 20 : 0))
+          : 0;
 
         setRounds(rounds.slice(0, -1));
         setGame({
           ...game,
           score_equipe1: game.score_equipe1 - totalTeam1,
           score_equipe2: game.score_equipe2 - totalTeam2,
+          ...(game.mode === '3_joueurs' && { score_equipe3: (game.score_equipe3 || 0) - totalTeam3 }),
         });
       }
     } catch (error) {
@@ -273,10 +292,10 @@ const GamePage: React.FC = () => {
             </button>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className={`grid ${game.mode === '3_joueurs' ? 'grid-cols-3' : 'grid-cols-2'} gap-4`}>
             <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
               <div className="text-sm font-semibold text-blue-700 mb-2">
-                {game.equipe1_nom || 'Équipe A'}
+                {game.mode === '3_joueurs' ? game.equipe1_nom || 'Joueur 1' : game.equipe1_nom || 'Équipe A'}
               </div>
               <div className="text-3xl font-bold text-blue-800">
                 {game.score_equipe1}
@@ -285,14 +304,44 @@ const GamePage: React.FC = () => {
 
             <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4">
               <div className="text-sm font-semibold text-red-700 mb-2">
-                {game.equipe2_nom || 'Équipe B'}
+                {game.mode === '3_joueurs' ? game.equipe2_nom || 'Joueur 2' : game.equipe2_nom || 'Équipe B'}
               </div>
               <div className="text-3xl font-bold text-red-800">
                 {game.score_equipe2}
               </div>
             </div>
+
+            {game.mode === '3_joueurs' && (
+              <div className="bg-green-50 border-2 border-green-200 rounded-lg p-4">
+                <div className="text-sm font-semibold text-green-700 mb-2">
+                  {game.equipe3_nom || 'Joueur 3'}
+                </div>
+                <div className="text-3xl font-bold text-green-800">
+                  {game.score_equipe3 || 0}
+                </div>
+              </div>
+            )}
           </div>
         </div>
+
+        {/* Rotation indicator (3-player mode only) */}
+        {game.mode === '3_joueurs' && (
+          <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl shadow-xl p-4 mb-4">
+            <div className="flex items-center justify-center gap-3">
+              <FaUsers className="text-purple-600 text-xl" />
+              <p className="text-base text-gray-700">
+                <span className="font-semibold">Manche #{rounds.length + 1} :</span>{' '}
+                <span className="text-purple-700 font-bold">
+                  {getPlayerAuPotName(
+                    rounds.length + 1,
+                    [game.equipe1_nom || 'Joueur 1', game.equipe2_nom || 'Joueur 2', game.equipe3_nom || 'Joueur 3']
+                  )}
+                </span>{' '}
+                est au pot (ne joue pas)
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Round Entry Form */}
         <div className="bg-white rounded-2xl shadow-xl p-6 mb-4">
@@ -304,31 +353,59 @@ const GamePage: React.FC = () => {
             {/* Calling team */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Qui a pris ?
+                {game.mode === '3_joueurs' ? 'Qui a pris ?' : 'Qui a pris ?'}
               </label>
-              <div className="flex gap-3">
-                <label className="flex-1 flex items-center justify-center p-3 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-300 transition-colors">
+              <div className={`grid ${game.mode === '3_joueurs' ? 'grid-cols-3' : 'grid-cols-2'} gap-3`}>
+                <label className={`flex items-center justify-center p-3 border-2 rounded-lg cursor-pointer hover:border-blue-300 transition-colors ${
+                  game.mode === '3_joueurs' && getPlayerAuPot(rounds.length + 1) === 1 ? 'opacity-50 cursor-not-allowed bg-gray-100' : 'border-gray-200'
+                } ${callingTeam === 1 ? 'border-blue-500 bg-blue-50' : ''}`}>
                   <input
                     type="radio"
                     name="callingTeam"
                     value="1"
                     checked={callingTeam === 1}
                     onChange={() => setCallingTeam(1)}
+                    disabled={game.mode === '3_joueurs' && getPlayerAuPot(rounds.length + 1) === 1}
                     className="w-4 h-4 text-blue-600 focus:ring-blue-500"
                   />
-                  <span className="ml-3 text-gray-900">{game.equipe1_nom || 'Équipe A'}</span>
+                  <span className="ml-3 text-gray-900">
+                    {game.mode === '3_joueurs' ? game.equipe1_nom || 'Joueur 1' : game.equipe1_nom || 'Équipe A'}
+                  </span>
                 </label>
-                <label className="flex-1 flex items-center justify-center p-3 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-red-300 transition-colors">
+
+                <label className={`flex items-center justify-center p-3 border-2 rounded-lg cursor-pointer hover:border-red-300 transition-colors ${
+                  game.mode === '3_joueurs' && getPlayerAuPot(rounds.length + 1) === 2 ? 'opacity-50 cursor-not-allowed bg-gray-100' : 'border-gray-200'
+                } ${callingTeam === 2 ? 'border-red-500 bg-red-50' : ''}`}>
                   <input
                     type="radio"
                     name="callingTeam"
                     value="2"
                     checked={callingTeam === 2}
                     onChange={() => setCallingTeam(2)}
+                    disabled={game.mode === '3_joueurs' && getPlayerAuPot(rounds.length + 1) === 2}
                     className="w-4 h-4 text-red-600 focus:ring-red-500"
                   />
-                  <span className="ml-3 text-gray-900">{game.equipe2_nom || 'Équipe B'}</span>
+                  <span className="ml-3 text-gray-900">
+                    {game.mode === '3_joueurs' ? game.equipe2_nom || 'Joueur 2' : game.equipe2_nom || 'Équipe B'}
+                  </span>
                 </label>
+
+                {game.mode === '3_joueurs' && (
+                  <label className={`flex items-center justify-center p-3 border-2 rounded-lg cursor-pointer hover:border-green-300 transition-colors ${
+                    getPlayerAuPot(rounds.length + 1) === 3 ? 'opacity-50 cursor-not-allowed bg-gray-100' : 'border-gray-200'
+                  } ${callingTeam === 3 ? 'border-green-500 bg-green-50' : ''}`}>
+                    <input
+                      type="radio"
+                      name="callingTeam"
+                      value="3"
+                      checked={callingTeam === 3}
+                      onChange={() => setCallingTeam(3)}
+                      disabled={getPlayerAuPot(rounds.length + 1) === 3}
+                      className="w-4 h-4 text-green-600 focus:ring-green-500"
+                    />
+                    <span className="ml-3 text-gray-900">{game.equipe3_nom || 'Joueur 3'}</span>
+                  </label>
+                )}
               </div>
             </div>
 
@@ -357,43 +434,84 @@ const GamePage: React.FC = () => {
               </div>
             </div>
 
-            {/* Entry mode */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Mode de saisie
-              </label>
-              <div className="flex gap-3">
-                <label className="flex-1 flex items-center justify-center p-3 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-indigo-300 transition-colors">
-                  <input
-                    type="radio"
-                    name="entryMode"
-                    value="2_teams"
-                    checked={entryMode === '2_teams'}
-                    onChange={() => setEntryMode('2_teams')}
-                    className="w-4 h-4 text-indigo-600 focus:ring-indigo-500"
-                  />
-                  <span className="ml-3 text-gray-900">Points des 2 équipes</span>
+            {/* Entry mode - only for 4-player mode */}
+            {game.mode === '4_joueurs' && (
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Mode de saisie
                 </label>
-                <label className="flex-1 flex items-center justify-center p-3 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-indigo-300 transition-colors">
-                  <input
-                    type="radio"
-                    name="entryMode"
-                    value="1_team"
-                    checked={entryMode === '1_team'}
-                    onChange={() => setEntryMode('1_team')}
-                    className="w-4 h-4 text-indigo-600 focus:ring-indigo-500"
-                  />
-                  <span className="ml-3 text-gray-900">Points d'une seule équipe</span>
-                </label>
+                <div className="flex gap-3">
+                  <label className="flex-1 flex items-center justify-center p-3 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-indigo-300 transition-colors">
+                    <input
+                      type="radio"
+                      name="entryMode"
+                      value="2_teams"
+                      checked={entryMode === '2_teams'}
+                      onChange={() => setEntryMode('2_teams')}
+                      className="w-4 h-4 text-indigo-600 focus:ring-indigo-500"
+                    />
+                    <span className="ml-3 text-gray-900">Points des 2 équipes</span>
+                  </label>
+                  <label className="flex-1 flex items-center justify-center p-3 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-indigo-300 transition-colors">
+                    <input
+                      type="radio"
+                      name="entryMode"
+                      value="1_team"
+                      checked={entryMode === '1_team'}
+                      onChange={() => setEntryMode('1_team')}
+                      className="w-4 h-4 text-indigo-600 focus:ring-indigo-500"
+                    />
+                    <span className="ml-3 text-gray-900">Points d'une seule équipe</span>
+                  </label>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Points */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Points de la manche
               </label>
-              {entryMode === '2_teams' ? (
+              {game.mode === '3_joueurs' ? (
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <input
+                      type="number"
+                      placeholder={`Points ${game.equipe1_nom || 'Joueur 1'}`}
+                      value={pointsTeam1}
+                      onChange={(e) => setPointsTeam1(e.target.value)}
+                      disabled={getPlayerAuPot(rounds.length + 1) === 1}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    />
+                    {validationErrors.pointsTeam1 && (
+                      <p className="text-red-500 text-xs mt-1">{validationErrors.pointsTeam1}</p>
+                    )}
+                  </div>
+                  <div>
+                    <input
+                      type="number"
+                      placeholder={`Points ${game.equipe2_nom || 'Joueur 2'}`}
+                      value={pointsTeam2}
+                      onChange={(e) => setPointsTeam2(e.target.value)}
+                      disabled={getPlayerAuPot(rounds.length + 1) === 2}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    />
+                    {validationErrors.pointsTeam2 && (
+                      <p className="text-red-500 text-xs mt-1">{validationErrors.pointsTeam2}</p>
+                    )}
+                  </div>
+                  <div>
+                    <input
+                      type="number"
+                      placeholder={`Points ${game.equipe3_nom || 'Joueur 3'}`}
+                      value={pointsTeam3}
+                      onChange={(e) => setPointsTeam3(e.target.value)}
+                      disabled={getPlayerAuPot(rounds.length + 1) === 3}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    />
+                  </div>
+                </div>
+              ) : entryMode === '2_teams' ? (
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <input
@@ -463,14 +581,15 @@ const GamePage: React.FC = () => {
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Annonces (optionnel)
               </label>
-              <div className="grid grid-cols-2 gap-4">
+              <div className={`grid ${game.mode === '3_joueurs' ? 'grid-cols-3' : 'grid-cols-2'} gap-4`}>
                 <div>
                   <input
                     type="number"
-                    placeholder="Annonces Équipe A"
+                    placeholder={`Annonces ${game.mode === '3_joueurs' ? game.equipe1_nom || 'Joueur 1' : 'Équipe A'}`}
                     value={announcementsTeam1}
                     onChange={(e) => setAnnouncementsTeam1(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    disabled={game.mode === '3_joueurs' && getPlayerAuPot(rounds.length + 1) === 1}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
                   />
                   {validationErrors.announcementsTeam1 && (
                     <p className="text-red-500 text-xs mt-1">{validationErrors.announcementsTeam1}</p>
@@ -479,15 +598,28 @@ const GamePage: React.FC = () => {
                 <div>
                   <input
                     type="number"
-                    placeholder="Annonces Équipe B"
+                    placeholder={`Annonces ${game.mode === '3_joueurs' ? game.equipe2_nom || 'Joueur 2' : 'Équipe B'}`}
                     value={announcementsTeam2}
                     onChange={(e) => setAnnouncementsTeam2(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    disabled={game.mode === '3_joueurs' && getPlayerAuPot(rounds.length + 1) === 2}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
                   />
                   {validationErrors.announcementsTeam2 && (
                     <p className="text-red-500 text-xs mt-1">{validationErrors.announcementsTeam2}</p>
                   )}
                 </div>
+                {game.mode === '3_joueurs' && (
+                  <div>
+                    <input
+                      type="number"
+                      placeholder={`Annonces ${game.equipe3_nom || 'Joueur 3'}`}
+                      value={announcementsTeam3}
+                      onChange={(e) => setAnnouncementsTeam3(e.target.value)}
+                      disabled={getPlayerAuPot(rounds.length + 1) === 3}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    />
+                  </div>
+                )}
               </div>
             </div>
 
@@ -496,22 +628,23 @@ const GamePage: React.FC = () => {
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Belote/Rebelote (+20 pts)
               </label>
-              <div className="flex gap-3">
+              <div className={`grid ${game.mode === '3_joueurs' ? 'grid-cols-4' : 'grid-cols-3'} gap-3`}>
                 {[
                   { value: 0, label: 'Aucune' },
-                  { value: 1, label: game.equipe1_nom || 'Équipe A' },
-                  { value: 2, label: game.equipe2_nom || 'Équipe B' },
+                  { value: 1, label: game.mode === '3_joueurs' ? game.equipe1_nom || 'Joueur 1' : game.equipe1_nom || 'Équipe A' },
+                  { value: 2, label: game.mode === '3_joueurs' ? game.equipe2_nom || 'Joueur 2' : game.equipe2_nom || 'Équipe B' },
+                  ...(game.mode === '3_joueurs' ? [{ value: 3, label: game.equipe3_nom || 'Joueur 3' }] : []),
                 ].map((option) => (
                   <label
                     key={option.value}
-                    className="flex-1 flex items-center justify-center p-3 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-indigo-300 transition-colors"
+                    className="flex items-center justify-center p-3 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-indigo-300 transition-colors"
                   >
                     <input
                       type="radio"
                       name="beloteTeam"
                       value={option.value}
                       checked={beloteTeam === option.value}
-                      onChange={() => setBeloteTeam(option.value as 0 | 1 | 2)}
+                      onChange={() => setBeloteTeam(option.value as 0 | 1 | 2 | 3)}
                       className="w-4 h-4 text-indigo-600 focus:ring-indigo-500"
                     />
                     <span className="ml-3 text-gray-900">{option.label}</span>
@@ -527,8 +660,10 @@ const GamePage: React.FC = () => {
                 onClick={() => {
                   setPointsTeam1('');
                   setPointsTeam2('');
+                  setPointsTeam3('');
                   setAnnouncementsTeam1('0');
                   setAnnouncementsTeam2('0');
+                  setAnnouncementsTeam3('0');
                   setBeloteTeam(0);
                 }}
                 className="flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-3 px-6 rounded-xl transition-all duration-200"
@@ -575,37 +710,89 @@ const GamePage: React.FC = () => {
             </div>
           ) : (
             <div className="space-y-2 max-h-96 overflow-y-auto">
-              {rounds.slice().reverse().map((round) => (
-                <div
-                  key={round.id}
-                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                >
-                  <div className="flex items-center gap-4">
-                    <span className="font-bold text-gray-700">#{round.numero}</span>
-                    <span className="text-xl">{getTrumpSymbol(round.atout)}</span>
-                    <span className="text-sm text-gray-600">
-                      {round.preneur_equipe === 1 ? game.equipe1_nom || 'Équipe A' : game.equipe2_nom || 'Équipe B'}
-                    </span>
+              {rounds.slice().reverse().map((round) => {
+                const playerAuPot = game.mode === '3_joueurs' ? getPlayerAuPot(round.numero) : null;
+
+                return (
+                  <div
+                    key={round.id}
+                    className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-4">
+                        <span className="font-bold text-gray-700">#{round.numero}</span>
+                        <span className="text-xl">{getTrumpSymbol(round.atout)}</span>
+                        {game.mode === '3_joueurs' ? (
+                          <>
+                            <span className="text-sm text-gray-600">
+                              Preneur: {
+                                round.preneur_equipe === 1 ? game.equipe1_nom || 'Joueur 1' :
+                                round.preneur_equipe === 2 ? game.equipe2_nom || 'Joueur 2' :
+                                game.equipe3_nom || 'Joueur 3'
+                              }
+                            </span>
+                            <span className="text-xs text-purple-600 bg-purple-50 px-2 py-1 rounded">
+                              {playerAuPot === 1 ? game.equipe1_nom || 'Joueur 1' :
+                               playerAuPot === 2 ? game.equipe2_nom || 'Joueur 2' :
+                               game.equipe3_nom || 'Joueur 3'} au pot
+                            </span>
+                          </>
+                        ) : (
+                          <span className="text-sm text-gray-600">
+                            {round.preneur_equipe === 1 ? game.equipe1_nom || 'Équipe A' : game.equipe2_nom || 'Équipe B'}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className={`grid ${game.mode === '3_joueurs' ? 'grid-cols-3' : 'grid-cols-2'} gap-4`}>
+                      <div className={`flex items-center justify-center ${playerAuPot === 1 ? 'opacity-50' : ''}`}>
+                        <span className="font-semibold text-blue-700">
+                          {round.points_equipe1 + round.annonces_equipe1 + (round.belote_equipe === 1 ? 20 : 0)}
+                        </span>
+                        {round.annonces_equipe1 > 0 && (
+                          <span className="text-xs text-gray-500 ml-1">
+                            (+{round.annonces_equipe1})
+                          </span>
+                        )}
+                        {round.belote_equipe === 1 && (
+                          <span className="text-xs text-gray-500 ml-1">(+20)</span>
+                        )}
+                      </div>
+
+                      <div className={`flex items-center justify-center ${playerAuPot === 2 ? 'opacity-50' : ''}`}>
+                        <span className="font-semibold text-red-700">
+                          {round.points_equipe2 + round.annonces_equipe2 + (round.belote_equipe === 2 ? 20 : 0)}
+                        </span>
+                        {round.annonces_equipe2 > 0 && (
+                          <span className="text-xs text-gray-500 ml-1">
+                            (+{round.annonces_equipe2})
+                          </span>
+                        )}
+                        {round.belote_equipe === 2 && (
+                          <span className="text-xs text-gray-500 ml-1">(+20)</span>
+                        )}
+                      </div>
+
+                      {game.mode === '3_joueurs' && (
+                        <div className={`flex items-center justify-center ${playerAuPot === 3 ? 'opacity-50' : ''}`}>
+                          <span className="font-semibold text-green-700">
+                            {(round.points_equipe3 || 0) + (round.annonces_equipe3 || 0) + (round.belote_equipe === 3 ? 20 : 0)}
+                          </span>
+                          {(round.annonces_equipe3 || 0) > 0 && (
+                            <span className="text-xs text-gray-500 ml-1">
+                              (+{round.annonces_equipe3})
+                            </span>
+                          )}
+                          {round.belote_equipe === 3 && (
+                            <span className="text-xs text-gray-500 ml-1">(+20)</span>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <span className="font-semibold text-blue-700">
-                      {round.points_equipe1 + round.annonces_equipe1 + (round.belote_equipe === 1 ? 20 : 0)}
-                    </span>
-                    <span className="text-gray-400">/</span>
-                    <span className="font-semibold text-red-700">
-                      {round.points_equipe2 + round.annonces_equipe2 + (round.belote_equipe === 2 ? 20 : 0)}
-                    </span>
-                    {(round.annonces_equipe1 > 0 || round.annonces_equipe2 > 0) && (
-                      <span className="text-xs text-gray-500">
-                        (+{round.annonces_equipe1 + round.annonces_equipe2} annonces)
-                      </span>
-                    )}
-                    {round.belote_equipe !== 0 && (
-                      <span className="text-xs text-gray-500">(+20 belote)</span>
-                    )}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

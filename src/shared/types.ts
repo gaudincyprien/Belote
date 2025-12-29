@@ -15,12 +15,14 @@ export interface GameData {
 export interface CreateRoundParams {
   gameId: number;
   trumpSuit: TrumpSuit;
-  callingTeam: 1 | 2;
+  callingTeam: 1 | 2 | 3; // Allow player 3
   pointsTeam1: number;
   pointsTeam2: number;
+  pointsTeam3?: number; // NEW - optional for 3-player mode
   announcementsTeam1: number;
   announcementsTeam2: number;
-  beloteTeam: 0 | 1 | 2;
+  announcementsTeam3?: number; // NEW - optional for 3-player mode
+  beloteTeam: 0 | 1 | 2 | 3; // Allow player 3
 }
 
 export interface ElectronAPI {
@@ -54,8 +56,10 @@ export interface Game {
   mode: GameMode;
   equipe1_nom: string | null;
   equipe2_nom: string | null;
+  equipe3_nom?: string | null; // NEW - optional for 3-player mode
   score_equipe1: number;
   score_equipe2: number;
+  score_equipe3?: number; // NEW - optional for 3-player mode
   gagnant: number | null;
   terminee: boolean;
   duree_minutes: number | null;
@@ -69,8 +73,10 @@ export interface Round {
   preneur_equipe: number;
   points_equipe1: number;
   points_equipe2: number;
+  points_equipe3?: number; // NEW - optional for 3-player mode
   annonces_equipe1: number;
   annonces_equipe2: number;
+  annonces_equipe3?: number; // NEW - optional for 3-player mode
   belote_equipe: number;
   timestamp: string;
 }
@@ -123,6 +129,43 @@ export interface GameStatistics {
   beloteCount: {
     team1: number;
     team2: number;
+  };
+
+  // NEW - Optional fields for 3-player mode
+  roundDistribution3?: {
+    player1: { count: number; percentage: number };
+    player2: { count: number; percentage: number };
+    player3: { count: number; percentage: number };
+  };
+
+  successRate3?: {
+    player1: { successful: number; total: number; percentage: number };
+    player2: { successful: number; total: number; percentage: number };
+    player3: { successful: number; total: number; percentage: number };
+  };
+
+  bestRounds3?: {
+    player1: { roundNumber: number; points: number; trump: TrumpSuit } | null;
+    player2: { roundNumber: number; points: number; trump: TrumpSuit } | null;
+    player3: { roundNumber: number; points: number; trump: TrumpSuit } | null;
+  };
+
+  totalAnnouncements3?: {
+    player1: number;
+    player2: number;
+    player3: number;
+  };
+
+  beloteCount3?: {
+    player1: number;
+    player2: number;
+    player3: number;
+  };
+
+  finalScores3?: {
+    player1: number;
+    player2: number;
+    player3: number;
   };
 }
 
