@@ -10,6 +10,8 @@ import {
   type RoundFormData,
   type RoundValidationErrors,
 } from '../utils/roundValidation';
+import { DEFAULT_VICTORY_THRESHOLD } from '../../shared/constants';
+import { shouldEndGame } from '../utils/gameStatistics';
 
 const GamePage: React.FC = () => {
   const { gameId } = useParams<{ gameId: string }>();
@@ -85,6 +87,25 @@ const GamePage: React.FC = () => {
     return calculateTotalPoints(formData);
   }, [formData]);
 
+  // End game handler
+  const handleEndGame = () => {
+    if (game.terminee) return;
+
+    if (rounds.length === 0) {
+      alert('Impossible de terminer une partie sans manches');
+      return;
+    }
+
+    const confirmed = confirm(
+      'Voulez-vous vraiment terminer cette partie maintenant ?\n' +
+      `Score actuel : ${game.score_equipe1} - ${game.score_equipe2}`
+    );
+
+    if (confirmed) {
+      navigate(`/game/${gameId}/results`);
+    }
+  };
+
   // Submit round
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -116,11 +137,21 @@ const GamePage: React.FC = () => {
       const totalTeam1 = team1Points + announcements1 + (beloteTeam === 1 ? 20 : 0);
       const totalTeam2 = team2Points + announcements2 + (beloteTeam === 2 ? 20 : 0);
 
-      setGame({
+      const updatedGame = {
         ...game,
         score_equipe1: game.score_equipe1 + totalTeam1,
         score_equipe2: game.score_equipe2 + totalTeam2,
-      });
+      };
+
+      setGame(updatedGame);
+
+      // Check if game should end
+      if (shouldEndGame(updatedGame, DEFAULT_VICTORY_THRESHOLD)) {
+        setTimeout(() => {
+          navigate(`/game/${gameId}/results`);
+        }, 500);
+        return;
+      }
 
       // Reset form
       setPointsTeam1('');
@@ -184,6 +215,30 @@ const GamePage: React.FC = () => {
     );
   }
 
+  // Protection for completed games
+  if (game && game.terminee) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
+          <h1 className="text-2xl font-bold text-gray-800 mb-4">Partie terminée</h1>
+          <p className="text-gray-600 mb-6">Cette partie est déjà terminée</p>
+          <button
+            onClick={() => navigate(`/game/${gameId}/results`)}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 mr-4"
+          >
+            Voir les résultats
+          </button>
+          <button
+            onClick={() => navigate('/')}
+            className="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200"
+          >
+            Retour à l&apos;accueil
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (!game) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
@@ -193,7 +248,7 @@ const GamePage: React.FC = () => {
             onClick={() => navigate('/')}
             className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200"
           >
-            Retour à l'accueil
+            Retour à l&apos;accueil
           </button>
         </div>
       </div>
@@ -553,6 +608,25 @@ const GamePage: React.FC = () => {
               ))}
             </div>
           )}
+        </div>
+
+        {/* Footer Actions */}
+        <div className="bg-white rounded-2xl shadow-xl p-6 mt-4">
+          <div className="flex gap-4">
+            <button
+              onClick={handleEndGame}
+              disabled={rounds.length === 0}
+              className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200"
+            >
+              Terminer la partie
+            </button>
+            <button
+              onClick={() => navigate('/')}
+              className="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200"
+            >
+              Retour au menu
+            </button>
+          </div>
         </div>
       </div>
     </div>

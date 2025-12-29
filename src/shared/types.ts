@@ -29,6 +29,7 @@ export interface ElectronAPI {
   getGame?: (gameId: number) => Promise<GameData>;
   createRound?: (params: CreateRoundParams) => Promise<Round>;
   deleteLastRound?: (gameId: number) => Promise<boolean>;
+  finalizeGame?: (params: FinalizeGameParams) => Promise<Game>;
 }
 
 declare global {
@@ -72,4 +73,61 @@ export interface Round {
   annonces_equipe2: number;
   belote_equipe: number;
   timestamp: string;
+}
+
+// Statistiques complètes d'une partie
+export interface GameStatistics {
+  // Métadonnées de la partie
+  totalRounds: number;
+  duration: number; // en minutes
+  winner: 1 | 2;
+  finalScores: {
+    team1: number;
+    team2: number;
+  };
+
+  // Distribution des prises
+  roundDistribution: {
+    team1: { count: number; percentage: number };
+    team2: { count: number; percentage: number };
+  };
+
+  // Distribution des atouts
+  trumpDistribution: {
+    pique: number;
+    coeur: number;
+    carreau: number;
+    trefle: number;
+    sans_atout: number;
+    tout_atout: number;
+  };
+
+  // Taux de réussite (prises gagnées par équipe)
+  successRate: {
+    team1: { successful: number; total: number; percentage: number };
+    team2: { successful: number; total: number; percentage: number };
+  };
+
+  // Meilleures manches
+  bestRounds: {
+    team1: { roundNumber: number; points: number; trump: TrumpSuit } | null;
+    team2: { roundNumber: number; points: number; trump: TrumpSuit } | null;
+  };
+
+  // Annonces et belotes
+  totalAnnouncements: {
+    team1: number;
+    team2: number;
+  };
+
+  beloteCount: {
+    team1: number;
+    team2: number;
+  };
+}
+
+// Paramètres de finalisation
+export interface FinalizeGameParams {
+  gameId: number;
+  forced: boolean; // true si manuel, false si auto (seuil atteint)
 }

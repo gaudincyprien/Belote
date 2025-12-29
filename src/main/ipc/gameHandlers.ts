@@ -1,6 +1,6 @@
 import { ipcMain } from 'electron';
 import { DatabaseService, GameRepository, PlayerRepository, RoundRepository } from '../database';
-import type { CreateGameParams, GameData, CreateRoundParams, Round } from '../../shared/types';
+import type { CreateGameParams, GameData, CreateRoundParams, Round, FinalizeGameParams, Game } from '../../shared/types';
 
 /**
  * Register IPC handlers for game-related operations
@@ -116,6 +116,11 @@ export function registerGameHandlers() {
 
     try {
       return db.getDatabase().transaction(() => {
+        // Check if game is already completed
+        const game = gameRepo.findById(params.gameId);
+        if (!game) throw new Error('Game not found');
+        if (game.terminee) throw new Error('Cannot add rounds to a completed game');
+
         // Compter les manches existantes
         const roundCount = roundRepo.countByGame(params.gameId);
 
@@ -161,6 +166,11 @@ export function registerGameHandlers() {
 
     try {
       return db.getDatabase().transaction(() => {
+        // Check if game is already completed
+        const game = gameRepo.findById(gameId);
+        if (!game) throw new Error('Game not found');
+        if (game.terminee) throw new Error('Cannot delete rounds from a completed game');
+
         const lastRound = roundRepo.findLastByGame(gameId);
         if (!lastRound) return false;
 
@@ -181,6 +191,47 @@ export function registerGameHandlers() {
     } catch (error) {
       console.error('Error deleting last round:', error);
       throw new Error('Failed to delete last round');
+    }
+  });
+
+  /**
+   * Finalize a game (mark as complete)
+   */
+  ipcMain.handle('game:finalize', async (_event, params: FinalizeGameParams): Promise<Game> => {
+    const db = DatabaseService.getInstance();
+    const gameRepo = new GameRepository(db);
+
+    try {
+      const game = gameRepo.findById(params.gameId);
+      if (!game) {
+        throw new Error('Game not found');
+      }
+
+      if (game.terminee) {
+        throw new Error('Game already finalized');
+      }
+
+      // Calculer le gagnant et la durée
+      const winner = game.score_equipe1 > game.score_equipe2 ? 1 : 2;
+      const startTime = new Date(game.date).getTime();
+      const endTime = Date.now();
+      const duration = Math.max(1, Math.round((endTime - startTime) / 60000));
+
+      // Mettre à jour la partie
+      const updatedGame = gameRepo.update(params.gameId, {
+        terminee: true,
+        gagnant: winner,
+        duree_minutes: duration,
+      });
+
+      if (!updatedGame) {
+        throw new Error('Failed to finalize game');
+      }
+
+      return updatedGame;
+    } catch (error) {
+      console.error('Error finalizing game:', error);
+      throw new Error(error instanceof Error ? error.message : 'Failed to finalize game');
     }
   });
 }
