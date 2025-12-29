@@ -216,7 +216,7 @@ CREATE TABLE migrations (
 
 ---
 
-### **DEV-004 : Interface - Écran de jeu principal (4 joueurs)**
+### **✅ DEV-004 : Interface - Écran de jeu principal (4 joueurs)** [TERMINÉ]
 
 **Objectif :** Saisie des manches et affichage du score
 
