@@ -375,7 +375,7 @@ CREATE TABLE migrations (
 
 ---
 
-### **DEV-006 : Mode 3 joueurs**
+### **✅ DEV-006 : Mode 3 joueurs** [TERMINÉ]
 
 **Objectif :** Gérer la rotation du joueur au pot
 
