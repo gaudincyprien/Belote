@@ -8,6 +8,7 @@ import SettingsPage from './pages/SettingsPage';
 import PlayersPage from './pages/PlayersPage';
 import HistoryPage from './pages/HistoryPage';
 import StatsPage from './pages/StatsPage';
+import PlayerStatsPage from './pages/PlayerStatsPage';
 
 const App: React.FC = () => {
   return (
@@ -21,6 +22,7 @@ const App: React.FC = () => {
         <Route path="/players" element={<PlayersPage />} />
         <Route path="/history" element={<HistoryPage />} />
         <Route path="/stats" element={<StatsPage />} />
+        <Route path="/player/:playerId/stats" element={<PlayerStatsPage />} />
       </Routes>
     </Router>
   );
