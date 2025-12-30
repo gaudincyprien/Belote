@@ -8,8 +8,8 @@ import { Player } from '../../shared/types';
 export class PlayerRepository {
   private db: Database.Database;
 
-  constructor() {
-    this.db = DatabaseService.getInstance().getDatabase();
+  constructor(dbService: DatabaseService) {
+    this.db = dbService.getDatabase();
   }
 
   /**

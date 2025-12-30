@@ -32,6 +32,13 @@ export interface ElectronAPI {
   createRound?: (params: CreateRoundParams) => Promise<Round>;
   deleteLastRound?: (gameId: number) => Promise<boolean>;
   finalizeGame?: (params: FinalizeGameParams) => Promise<Game>;
+
+  // Player management
+  listPlayers?: () => Promise<Player[]>;
+  createPlayer?: (nom: string) => Promise<Player>;
+  updatePlayer?: (id: number, nom: string) => Promise<Player | null>;
+  deletePlayer?: (id: number) => Promise<boolean>;
+  countPlayerGames?: (playerId: number) => Promise<number>;
 }
 
 declare global {

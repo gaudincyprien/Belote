@@ -13,4 +13,11 @@ contextBridge.exposeInMainWorld('electron', {
   createRound: (params: CreateRoundParams) => ipcRenderer.invoke('game:createRound', params),
   deleteLastRound: (gameId: number) => ipcRenderer.invoke('game:deleteLastRound', gameId),
   finalizeGame: (params: FinalizeGameParams) => ipcRenderer.invoke('game:finalize', params),
+
+  // Player management
+  listPlayers: () => ipcRenderer.invoke('player:list'),
+  createPlayer: (nom: string) => ipcRenderer.invoke('player:create', nom),
+  updatePlayer: (id: number, nom: string) => ipcRenderer.invoke('player:update', id, nom),
+  deletePlayer: (id: number) => ipcRenderer.invoke('player:delete', id),
+  countPlayerGames: (playerId: number) => ipcRenderer.invoke('player:countGames', playerId),
 });

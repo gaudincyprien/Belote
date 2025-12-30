@@ -72,7 +72,8 @@ describe('DatabaseService', () => {
 });
 
 describe('PlayerRepository', () => {
-  const playerRepo = new PlayerRepository();
+  const db = DatabaseService.getInstance();
+  const playerRepo = new PlayerRepository(db);
 
   test('should create a player', () => {
     const player = playerRepo.create('Alice_' + Date.now());
