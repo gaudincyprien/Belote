@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { FaArrowLeft, FaUser, FaTrophy, FaFire } from 'react-icons/fa';
 import {
-  BarChart,
-  Bar,
   LineChart,
   Line,
   XAxis,

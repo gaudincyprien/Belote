@@ -59,6 +59,12 @@ const SettingsPage: React.FC = () => {
     try {
       if (window.electron?.updateSettings) {
         await window.electron.updateSettings(settings);
+
+        // Toggle shortcuts if the setting changed
+        if (window.electron?.toggleShortcuts) {
+          await window.electron.toggleShortcuts(settings.raccourcisActives);
+        }
+
         setHasChanges(false);
         alert('Paramètres sauvegardés avec succès');
       }

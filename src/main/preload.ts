@@ -42,4 +42,23 @@ contextBridge.exposeInMainWorld('electron', {
   resetAllSettings: () => ipcRenderer.invoke('settings:resetAll'),
   getSettingsPath: () => ipcRenderer.invoke('settings:getPath'),
   getSettingsSize: () => ipcRenderer.invoke('settings:getSize'),
+
+  // Shortcuts
+  toggleShortcuts: (enabled: boolean) => ipcRenderer.invoke('shortcuts:toggle', enabled),
+});
+
+// Listen for shortcut events from main process and dispatch them as custom events
+const shortcutEvents = [
+  'shortcut:new-game',
+  'shortcut:history',
+  'shortcut:stats',
+  'shortcut:settings',
+  'shortcut:quit',
+  'shortcut:help',
+];
+
+shortcutEvents.forEach((eventName) => {
+  ipcRenderer.on(eventName, () => {
+    window.dispatchEvent(new CustomEvent(eventName));
+  });
 });
