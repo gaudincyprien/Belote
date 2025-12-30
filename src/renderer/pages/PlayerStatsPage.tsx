@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { FaArrowLeft, FaUser, FaTrophy, FaFire } from 'react-icons/fa';
+import { FaArrowLeft } from 'react-icons/fa';
+import { FaUser, FaTrophy, FaFire } from 'react-icons/fa6';
 import {
   LineChart,
   Line,

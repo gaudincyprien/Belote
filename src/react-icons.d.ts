@@ -1,16 +1,31 @@
-// Fix for React 19 compatibility with react-icons
 declare module 'react-icons/fa' {
-  import { ComponentType, SVGProps } from 'react';
+  import * as React from 'react';
 
-  export const FaPlus: ComponentType<SVGProps<SVGSVGElement>>;
-  export const FaHistory: ComponentType<SVGProps<SVGSVGElement>>;
-  export const FaChartBar: ComponentType<SVGProps<SVGSVGElement>>;
-  export const FaCog: ComponentType<SVGProps<SVGSVGElement>>;
-  export const FaTimes: ComponentType<SVGProps<SVGSVGElement>>;
-  export const FaArrowLeft: ComponentType<SVGProps<SVGSVGElement>>;
-  export const FaPlay: ComponentType<SVGProps<SVGSVGElement>>;
-  export const FaUsers: ComponentType<SVGProps<SVGSVGElement>>;
-  export const FaEdit: ComponentType<SVGProps<SVGSVGElement>>;
-  export const FaTrash: ComponentType<SVGProps<SVGSVGElement>>;
-  export const FaSearch: ComponentType<SVGProps<SVGSVGElement>>;
+  export interface IconBaseProps extends React.SVGAttributes<SVGElement> {
+    children?: React.ReactNode;
+    size?: string | number;
+    color?: string;
+    title?: string;
+  }
+
+  export type IconType = (props: IconBaseProps) => JSX.Element;
+
+  export const FaUser: IconType;
+  export const FaTrophy: IconType;
+  export const FaFire: IconType;
+  export const FaCog: IconType;
+  export const FaDownload: IconType;
+  export const FaUpload: IconType;
+  export const FaRedo: IconType;
+  export const FaCheck: IconType;
+  export const FaTimes: IconType;
+  export const FaArrowLeft: IconType;
+  export const FaChartBar: IconType;
+  export const FaPlus: IconType;
+  export const FaEdit: IconType;
+  export const FaTrash: IconType;
+  export const FaSearch: IconType;
+  export const FaUsers: IconType;
+  export const FaPlay: IconType;
+  export const FaHistory: IconType;
 }

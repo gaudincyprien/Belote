@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaArrowLeft, FaCheck, FaRedo, FaCog, FaDownload, FaUpload } from 'react-icons/fa';
+import { FaArrowLeft } from 'react-icons/fa';
+import { FaCheck, FaRotate as FaRedo, FaGear as FaCog, FaDownload, FaUpload } from 'react-icons/fa6';
 import type { AppSettings, ImportSummary } from '../../shared/types';
 
 const SettingsPage: React.FC = () => {

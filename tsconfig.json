@@ -15,7 +15,8 @@
     "lib": ["ES6", "DOM"],
     "paths": {
       "*": ["node_modules/*"]
-    }
+    },
+    "strict": false
   },
   "include": ["src/**/*"]
 }
