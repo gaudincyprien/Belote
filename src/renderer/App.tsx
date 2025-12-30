@@ -11,12 +11,16 @@ import StatsPage from './pages/StatsPage';
 import PlayerStatsPage from './pages/PlayerStatsPage';
 import HelpModal from './components/HelpModal';
 import { useGlobalShortcuts } from './hooks/useGlobalShortcuts';
+import { useTheme } from './hooks/useTheme';
 
 const App: React.FC = () => {
   const [showHelp, setShowHelp] = useState(false);
 
   // Handle global keyboard shortcuts
   useGlobalShortcuts(() => setShowHelp(true));
+
+  // Handle theme
+  useTheme();
 
   return (
     <>
