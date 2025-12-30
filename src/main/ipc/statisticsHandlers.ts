@@ -1,10 +1,11 @@
 import { ipcMain } from 'electron';
-import { StatisticsRepository } from '../database';
+import { StatisticsRepository, PlayerStatisticsRepository } from '../database';
 import type {
   GlobalStatistics,
   PlayerRanking,
   TrumpStatistics,
   GlobalRecords,
+  PlayerStatistics,
 } from '../../shared/types';
 
 /**
@@ -64,6 +65,20 @@ export function registerStatisticsHandlers() {
     } catch (error) {
       console.error('Error getting global records:', error);
       throw new Error('Failed to get global records');
+    }
+  });
+
+  /**
+   * Get individual player statistics
+   */
+  ipcMain.handle('statistics:getPlayerStats', async (_event, playerId: number): Promise<PlayerStatistics> => {
+    const playerStatsRepo = new PlayerStatisticsRepository();
+
+    try {
+      return playerStatsRepo.getPlayerStatistics(playerId);
+    } catch (error) {
+      console.error(`Error getting player statistics for player ${playerId}:`, error);
+      throw new Error('Failed to get player statistics');
     }
   });
 }

@@ -31,4 +31,5 @@ contextBridge.exposeInMainWorld('electron', {
   getPlayerRankings: () => ipcRenderer.invoke('statistics:getPlayerRankings'),
   getTrumpStatistics: () => ipcRenderer.invoke('statistics:getTrumpStats'),
   getGlobalRecords: () => ipcRenderer.invoke('statistics:getRecords'),
+  getPlayerStatistics: (playerId: number) => ipcRenderer.invoke('statistics:getPlayerStats', playerId),
 });

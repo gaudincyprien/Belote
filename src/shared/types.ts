@@ -70,6 +70,7 @@ export interface ElectronAPI {
   getPlayerRankings?: () => Promise<PlayerRanking[]>;
   getTrumpStatistics?: () => Promise<TrumpStatistics[]>;
   getGlobalRecords?: () => Promise<GlobalRecords>;
+  getPlayerStatistics?: (playerId: number) => Promise<PlayerStatistics>;
 }
 
 declare global {
@@ -277,4 +278,75 @@ export interface GlobalRecords {
     gameId: number;
     roundCount: number;
   } | null;
+}
+
+// Individual Player Statistics
+export interface PlayerStatistics {
+  // Basic info
+  playerId: number;
+  playerName: string;
+  memberSince: string; // Date of first game
+
+  // Overview stats
+  gamesPlayed: number;
+  wins: number;
+  losses: number;
+  winRate: number; // percentage
+
+  // Trump preferences
+  trumpStats: PlayerTrumpStat[];
+  mostEffectiveTrump: TrumpSuit | null;
+  leastEffectiveTrump: TrumpSuit | null;
+
+  // Partners (4-player mode)
+  partnerStats: PartnerStat[];
+
+  // Personal records
+  personalRecords: PlayerRecords;
+
+  // Recent activity
+  recentActivity: PlayerRecentActivity;
+
+  // Win evolution (for chart)
+  winEvolution: WinEvolutionPoint[];
+}
+
+export interface PlayerTrumpStat {
+  trump: TrumpSuit;
+  takes: number; // number of times player took this trump
+  successRate: number; // percentage of successful takes
+}
+
+export interface PartnerStat {
+  partnerId: number;
+  partnerName: string;
+  gamesPlayed: number;
+  wins: number;
+  winRate: number; // percentage
+}
+
+export interface PlayerRecords {
+  bestRoundScore: {
+    gameId: number;
+    roundNumber: number;
+    points: number;
+    trump: TrumpSuit;
+  } | null;
+  longestWinStreak: number;
+  averagePointsPerGame: number;
+  totalTakes: number; // total number of times player was preneur
+  totalBelotes: number; // total belote/rebelote count
+}
+
+export interface PlayerRecentActivity {
+  lastGameDate: string | null;
+  lastGameResult: 'win' | 'loss' | null;
+  gamesThisMonth: number;
+  winsThisMonth: number;
+}
+
+export interface WinEvolutionPoint {
+  gameNumber: number; // game sequence number for this player
+  winRate: number; // cumulative win rate at this point
+  date: string;
 }

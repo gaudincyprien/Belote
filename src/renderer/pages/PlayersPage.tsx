@@ -174,9 +174,9 @@ const PlayersPage: React.FC = () => {
                             <FaTrash />
                           </button>
                           <button
-                            disabled
-                            className="text-gray-400 p-2 rounded-lg cursor-not-allowed"
-                            title="Disponible prochainement"
+                            onClick={() => navigate(`/player/${player.id}/stats`)}
+                            className="text-green-600 hover:text-green-800 p-2 rounded-lg hover:bg-green-50 transition-colors"
+                            title="Voir statistiques"
                           >
                             <FaChartBar />
                           </button>

@@ -213,7 +213,11 @@ const StatsPage: React.FC = () => {
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {rankings.map((player) => (
-                  <tr key={player.playerId} className="hover:bg-gray-50 transition-colors">
+                  <tr
+                    key={player.playerId}
+                    onClick={() => navigate(`/player/${player.playerId}/stats`)}
+                    className="hover:bg-indigo-50 transition-colors cursor-pointer"
+                  >
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         {player.rank === 1 && <span className="text-2xl">🥇</span>}
@@ -224,7 +228,9 @@ const StatsPage: React.FC = () => {
                         )}
                       </div>
                     </td>
-                    <td className="px-6 py-4 font-medium text-gray-900">{player.playerName}</td>
+                    <td className="px-6 py-4 font-medium text-indigo-600 hover:text-indigo-800">
+                      {player.playerName}
+                    </td>
                     <td className="px-6 py-4 text-right text-gray-700">{player.gamesPlayed}</td>
                     <td className="px-6 py-4 text-right text-gray-700">{player.wins}</td>
                     <td className="px-6 py-4 text-right">
