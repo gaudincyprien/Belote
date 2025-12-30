@@ -145,7 +145,6 @@ describe('GameRepository', () => {
 
   test('should create a game', () => {
     const game = gameRepo.create({
-      date: new Date().toISOString(),
       mode: '4_joueurs',
       equipe1_nom: 'Team A',
       equipe2_nom: 'Team B',
@@ -164,7 +163,6 @@ describe('GameRepository', () => {
 
   test('should find game by id', () => {
     const created = gameRepo.create({
-      date: new Date().toISOString(),
       mode: '3_joueurs',
       equipe1_nom: null,
       equipe2_nom: null,
@@ -183,7 +181,6 @@ describe('GameRepository', () => {
 
   test('should update a game', () => {
     const game = gameRepo.create({
-      date: new Date().toISOString(),
       mode: '4_joueurs',
       equipe1_nom: 'Team A',
       equipe2_nom: 'Team B',
@@ -208,7 +205,6 @@ describe('GameRepository', () => {
 
   test('should delete a game', () => {
     const game = gameRepo.create({
-      date: new Date().toISOString(),
       mode: '4_joueurs',
       equipe1_nom: 'Team A',
       equipe2_nom: 'Team B',
@@ -234,7 +230,6 @@ describe('RoundRepository', () => {
 
   test('should create a round', () => {
     const game = gameRepo.create({
-      date: new Date().toISOString(),
       mode: '4_joueurs',
       equipe1_nom: 'Team A',
       equipe2_nom: 'Team B',
@@ -265,7 +260,6 @@ describe('RoundRepository', () => {
 
   test('should find rounds by game', () => {
     const game = gameRepo.create({
-      date: new Date().toISOString(),
       mode: '4_joueurs',
       equipe1_nom: 'Team A',
       equipe2_nom: 'Team B',
@@ -309,7 +303,6 @@ describe('RoundRepository', () => {
 
   test('should delete a round', () => {
     const game = gameRepo.create({
-      date: new Date().toISOString(),
       mode: '4_joueurs',
       equipe1_nom: 'Team A',
       equipe2_nom: 'Team B',

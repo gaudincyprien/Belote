@@ -8,6 +8,7 @@ import {
   type PlayerNames,
   type ValidationErrors,
 } from '../utils/gameValidation';
+import PlayerAutocompleteInput from '../components/PlayerAutocompleteInput';
 
 const NewGamePage: React.FC = () => {
   const navigate = useNavigate();
@@ -129,30 +130,20 @@ const NewGamePage: React.FC = () => {
                   <div className="bg-blue-50 p-4 rounded-lg border-2 border-blue-200">
                     <div className="text-sm font-semibold text-blue-700 mb-3">Équipe A</div>
                     <div className="space-y-3">
-                      <div>
-                        <input
-                          type="text"
-                          placeholder="Nom joueur 1"
-                          value={playerNames.player1}
-                          onChange={(e) => handlePlayerNameChange('player1', e.target.value)}
-                          className="w-full px-4 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
-                        {validationErrors.player1 && (
-                          <p className="text-red-500 text-xs mt-1">{validationErrors.player1}</p>
-                        )}
-                      </div>
-                      <div>
-                        <input
-                          type="text"
-                          placeholder="Nom joueur 3"
-                          value={playerNames.player3}
-                          onChange={(e) => handlePlayerNameChange('player3', e.target.value)}
-                          className="w-full px-4 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
-                        {validationErrors.player3 && (
-                          <p className="text-red-500 text-xs mt-1">{validationErrors.player3}</p>
-                        )}
-                      </div>
+                      <PlayerAutocompleteInput
+                        value={playerNames.player1}
+                        onChange={(value) => handlePlayerNameChange('player1', value)}
+                        placeholder="Nom joueur 1"
+                        className="w-full px-4 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        error={validationErrors.player1}
+                      />
+                      <PlayerAutocompleteInput
+                        value={playerNames.player3}
+                        onChange={(value) => handlePlayerNameChange('player3', value)}
+                        placeholder="Nom joueur 3"
+                        className="w-full px-4 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        error={validationErrors.player3}
+                      />
                     </div>
                   </div>
 
@@ -160,30 +151,20 @@ const NewGamePage: React.FC = () => {
                   <div className="bg-red-50 p-4 rounded-lg border-2 border-red-200">
                     <div className="text-sm font-semibold text-red-700 mb-3">Équipe B</div>
                     <div className="space-y-3">
-                      <div>
-                        <input
-                          type="text"
-                          placeholder="Nom joueur 2"
-                          value={playerNames.player2}
-                          onChange={(e) => handlePlayerNameChange('player2', e.target.value)}
-                          className="w-full px-4 py-2 border border-red-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                        />
-                        {validationErrors.player2 && (
-                          <p className="text-red-500 text-xs mt-1">{validationErrors.player2}</p>
-                        )}
-                      </div>
-                      <div>
-                        <input
-                          type="text"
-                          placeholder="Nom joueur 4"
-                          value={playerNames.player4}
-                          onChange={(e) => handlePlayerNameChange('player4', e.target.value)}
-                          className="w-full px-4 py-2 border border-red-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                        />
-                        {validationErrors.player4 && (
-                          <p className="text-red-500 text-xs mt-1">{validationErrors.player4}</p>
-                        )}
-                      </div>
+                      <PlayerAutocompleteInput
+                        value={playerNames.player2}
+                        onChange={(value) => handlePlayerNameChange('player2', value)}
+                        placeholder="Nom joueur 2"
+                        className="w-full px-4 py-2 border border-red-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                        error={validationErrors.player2}
+                      />
+                      <PlayerAutocompleteInput
+                        value={playerNames.player4}
+                        onChange={(value) => handlePlayerNameChange('player4', value)}
+                        placeholder="Nom joueur 4"
+                        className="w-full px-4 py-2 border border-red-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                        error={validationErrors.player4}
+                      />
                     </div>
                   </div>
                 </div>
@@ -195,20 +176,14 @@ const NewGamePage: React.FC = () => {
                     </p>
                   </div>
                   {['player1', 'player2', 'player3'].map((playerKey, index) => (
-                    <div key={playerKey}>
-                      <input
-                        type="text"
-                        placeholder={`Nom joueur ${index + 1}`}
-                        value={playerNames[playerKey as keyof PlayerNames]}
-                        onChange={(e) => handlePlayerNameChange(playerKey as keyof PlayerNames, e.target.value)}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                      />
-                      {validationErrors[playerKey as keyof PlayerNames] && (
-                        <p className="text-red-500 text-xs mt-1">
-                          {validationErrors[playerKey as keyof PlayerNames]}
-                        </p>
-                      )}
-                    </div>
+                    <PlayerAutocompleteInput
+                      key={playerKey}
+                      value={playerNames[playerKey as keyof PlayerNames]}
+                      onChange={(value) => handlePlayerNameChange(playerKey as keyof PlayerNames, value)}
+                      placeholder={`Nom joueur ${index + 1}`}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      error={validationErrors[playerKey as keyof PlayerNames]}
+                    />
                   ))}
                 </div>
               )}

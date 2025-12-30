@@ -26,8 +26,7 @@ export function registerGameHandlers() {
 
           if (!player) {
             // Create new player
-            const playerId = playerRepo.create({ nom: playerName });
-            player = playerRepo.findById(playerId);
+            player = playerRepo.create(playerName);
           }
 
           if (player) {

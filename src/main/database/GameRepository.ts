@@ -15,7 +15,7 @@ export class GameRepository {
   /**
    * Créer une nouvelle partie
    */
-  create(game: Omit<Game, 'id'>): Game {
+  create(game: Omit<Game, 'id' | 'date'>): Game {
     const stmt = this.db.prepare(`
       INSERT INTO parties (
         mode, equipe1_nom, equipe2_nom,
