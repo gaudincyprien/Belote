@@ -1,14 +1,14 @@
 import type { TrumpSuit } from '../../shared/types';
 
 export interface RoundFormData {
-  callingTeam: 1 | 2;
+  callingTeam: 1 | 2 | 3;
   trumpSuit: TrumpSuit;
   entryMode: '2_teams' | '1_team';
   pointsTeam1: string;
   pointsTeam2: string;
   announcementsTeam1: string;
   announcementsTeam2: string;
-  beloteTeam: 0 | 1 | 2;
+  beloteTeam: 0 | 1 | 2 | 3;
 }
 
 export interface RoundValidationErrors {

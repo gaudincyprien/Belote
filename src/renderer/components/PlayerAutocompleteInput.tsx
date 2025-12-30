@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { FaUser, FaPlus } from 'react-icons/fa';
+import { FaPlus } from 'react-icons/fa';
 import type { Player } from '../../shared/types';
 
 interface PlayerAutocompleteInputProps {
@@ -184,7 +184,7 @@ const PlayerAutocompleteInput: React.FC<PlayerAutocompleteInputProps> = ({
         <div className="absolute right-3 top-2.5 pointer-events-none">
           {isExistingPlayer ? (
             <span className="flex items-center gap-1 text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
-              <FaUser className="text-xs" />
+              <span>👤</span>
               <span>Existant</span>
             </span>
           ) : value.trim().length <= 30 ? (
@@ -217,7 +217,7 @@ const PlayerAutocompleteInput: React.FC<PlayerAutocompleteInputProps> = ({
                       className="w-full px-4 py-2 text-left hover:bg-indigo-50 flex items-center justify-between group"
                     >
                       <div className="flex items-center gap-2">
-                        <FaUser className="text-blue-600 text-sm" />
+                        <span className="text-blue-600">👤</span>
                         <span className="text-gray-900">{player.nom}</span>
                       </div>
                       {player.gamesCount > 0 && (
