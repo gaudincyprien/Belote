@@ -81,6 +81,9 @@ export interface ElectronAPI {
   resetAllSettings?: () => Promise<void>;
   getSettingsPath?: () => Promise<string>;
   getSettingsSize?: () => Promise<number>;
+
+  // Shortcuts
+  toggleShortcuts?: (enabled: boolean) => Promise<void>;
 }
 
 declare global {
