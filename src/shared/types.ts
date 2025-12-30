@@ -1,5 +1,25 @@
 // Shared TypeScript types and interfaces
 
+// History filters
+export interface GameFilters {
+  dateFrom?: string;
+  dateTo?: string;
+  playerId?: number;
+  mode?: string;
+  sortBy?: 'date' | 'duration' | 'rounds';
+  sortOrder?: 'asc' | 'desc';
+  page?: number;
+  pageSize?: number;
+}
+
+export interface GameListResult {
+  games: Game[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
 // Window API (for Electron IPC)
 export interface CreateGameParams {
   mode: GameMode;
@@ -39,6 +59,11 @@ export interface ElectronAPI {
   updatePlayer?: (id: number, nom: string) => Promise<Player | null>;
   deletePlayer?: (id: number) => Promise<boolean>;
   countPlayerGames?: (playerId: number) => Promise<number>;
+
+  // History management
+  listGames?: (filters?: GameFilters) => Promise<GameListResult>;
+  countGameRounds?: (gameId: number) => Promise<number>;
+  deleteGame?: (gameId: number) => Promise<boolean>;
 }
 
 declare global {

@@ -12,12 +12,12 @@ export function registerGameHandlers() {
    */
   ipcMain.handle('game:create', async (_event, params: CreateGameParams): Promise<number> => {
     const db = DatabaseService.getInstance();
-    const gameRepo = new GameRepository(db);
-    const playerRepo = new PlayerRepository(db);
+    const gameRepo = new GameRepository();
+    const playerRepo = new PlayerRepository();
 
     try {
       // Start transaction
-      db.getDatabase().transaction(() => {
+      const createdGameId = db.getDatabase().transaction(() => {
         // Create or get players
         const playerIds: number[] = [];
         for (const playerName of params.playerNames) {
@@ -45,7 +45,7 @@ export function registerGameHandlers() {
         }
 
         // Create the game
-        const gameId = gameRepo.create({
+        const createdGame = gameRepo.create({
           mode: params.mode,
           equipe1_nom,
           equipe2_nom,
@@ -59,32 +59,28 @@ export function registerGameHandlers() {
         // Link players to the game
         if (params.mode === '4_joueurs') {
           // 4 players mode: players alternate teams
-          gameRepo.addPlayer(gameId, playerIds[0], 1); // Player 1 -> Team A
-          gameRepo.addPlayer(gameId, playerIds[1], 2); // Player 2 -> Team B
-          gameRepo.addPlayer(gameId, playerIds[2], 1); // Player 3 -> Team A
-          gameRepo.addPlayer(gameId, playerIds[3], 2); // Player 4 -> Team B
+          gameRepo.addPlayer(createdGame.id, playerIds[0], 1); // Player 1 -> Team A
+          gameRepo.addPlayer(createdGame.id, playerIds[1], 2); // Player 2 -> Team B
+          gameRepo.addPlayer(createdGame.id, playerIds[2], 1); // Player 3 -> Team A
+          gameRepo.addPlayer(createdGame.id, playerIds[3], 2); // Player 4 -> Team B
         } else {
           // 3 players mode: each player is their own team
-          gameRepo.addPlayer(gameId, playerIds[0], 1);
-          gameRepo.addPlayer(gameId, playerIds[1], 2);
-          gameRepo.addPlayer(gameId, playerIds[2], 3);
+          gameRepo.addPlayer(createdGame.id, playerIds[0], 1);
+          gameRepo.addPlayer(createdGame.id, playerIds[1], 2);
+          gameRepo.addPlayer(createdGame.id, playerIds[2], 3);
 
           // Set individual player names
-          gameRepo.update(gameId, {
+          gameRepo.update(createdGame.id, {
             equipe1_nom: params.playerNames[0],
             equipe2_nom: params.playerNames[1],
             equipe3_nom: params.playerNames[2],
           });
         }
 
-        return gameId;
+        return createdGame.id;
       })();
 
-      // Get the created game
-      const games = gameRepo.findAll();
-      const latestGame = games[games.length - 1];
-
-      return latestGame.id;
+      return createdGameId;
     } catch (error) {
       console.error('Error creating game:', error);
       throw new Error('Failed to create game');
@@ -123,9 +119,9 @@ export function registerGameHandlers() {
     try {
       return db.getDatabase().transaction(() => {
         // Check if game is already completed
-        const game = gameRepo.findById(params.gameId);
-        if (!game) throw new Error('Game not found');
-        if (game.terminee) throw new Error('Cannot add rounds to a completed game');
+        const currentGame = gameRepo.findById(params.gameId);
+        if (!currentGame) throw new Error('Game not found');
+        if (currentGame.terminee) throw new Error('Cannot add rounds to a completed game');
 
         // Compter les manches existantes
         const roundCount = roundRepo.countByGame(params.gameId);
@@ -151,14 +147,13 @@ export function registerGameHandlers() {
         const totalTeam3 = (params.pointsTeam3 || 0) + (params.announcementsTeam3 || 0) + (params.beloteTeam === 3 ? 20 : 0);
 
         // Mettre à jour les scores cumulés de la partie
-        const game = gameRepo.findById(params.gameId)!;
         const updates: any = {
-          score_equipe1: game.score_equipe1 + totalTeam1,
-          score_equipe2: game.score_equipe2 + totalTeam2,
+          score_equipe1: currentGame.score_equipe1 + totalTeam1,
+          score_equipe2: currentGame.score_equipe2 + totalTeam2,
         };
 
-        if (game.mode === '3_joueurs') {
-          updates.score_equipe3 = (game.score_equipe3 || 0) + totalTeam3;
+        if (currentGame.mode === '3_joueurs') {
+          updates.score_equipe3 = (currentGame.score_equipe3 || 0) + totalTeam3;
         }
 
         gameRepo.update(params.gameId, updates);
@@ -182,9 +177,9 @@ export function registerGameHandlers() {
     try {
       return db.getDatabase().transaction(() => {
         // Check if game is already completed
-        const game = gameRepo.findById(gameId);
-        if (!game) throw new Error('Game not found');
-        if (game.terminee) throw new Error('Cannot delete rounds from a completed game');
+        const currentGame = gameRepo.findById(gameId);
+        if (!currentGame) throw new Error('Game not found');
+        if (currentGame.terminee) throw new Error('Cannot delete rounds from a completed game');
 
         const lastRound = roundRepo.findLastByGame(gameId);
         if (!lastRound) return false;
@@ -194,10 +189,9 @@ export function registerGameHandlers() {
         const totalTeam2 = lastRound.points_equipe2 + lastRound.annonces_equipe2 + (lastRound.belote_equipe === 2 ? 20 : 0);
 
         // Soustraire les scores
-        const game = gameRepo.findById(gameId)!;
         gameRepo.update(gameId, {
-          score_equipe1: game.score_equipe1 - totalTeam1,
-          score_equipe2: game.score_equipe2 - totalTeam2,
+          score_equipe1: currentGame.score_equipe1 - totalTeam1,
+          score_equipe2: currentGame.score_equipe2 - totalTeam2,
         });
 
         // Supprimer la manche
@@ -213,8 +207,7 @@ export function registerGameHandlers() {
    * Finalize a game (mark as complete)
    */
   ipcMain.handle('game:finalize', async (_event, params: FinalizeGameParams): Promise<Game> => {
-    const db = DatabaseService.getInstance();
-    const gameRepo = new GameRepository(db);
+    const gameRepo = new GameRepository();
 
     try {
       const game = gameRepo.findById(params.gameId);

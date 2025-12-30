@@ -11,8 +11,7 @@ export function registerPlayerHandlers() {
    * Returns list of all players sorted alphabetically
    */
   ipcMain.handle('player:list', async (): Promise<Player[]> => {
-    const db = DatabaseService.getInstance();
-    const playerRepo = new PlayerRepository(db);
+    const playerRepo = new PlayerRepository();
 
     try {
       return playerRepo.findAll();
@@ -27,8 +26,7 @@ export function registerPlayerHandlers() {
    * Returns the created player
    */
   ipcMain.handle('player:create', async (_event, nom: string): Promise<Player> => {
-    const db = DatabaseService.getInstance();
-    const playerRepo = new PlayerRepository(db);
+    const playerRepo = new PlayerRepository();
 
     try {
       // Check for duplicates
@@ -49,8 +47,7 @@ export function registerPlayerHandlers() {
    * Returns the updated player
    */
   ipcMain.handle('player:update', async (_event, id: number, nom: string): Promise<Player | null> => {
-    const db = DatabaseService.getInstance();
-    const playerRepo = new PlayerRepository(db);
+    const playerRepo = new PlayerRepository();
 
     try {
       // Check if player exists
@@ -78,8 +75,7 @@ export function registerPlayerHandlers() {
    * Returns true if deleted successfully
    */
   ipcMain.handle('player:delete', async (_event, id: number): Promise<boolean> => {
-    const db = DatabaseService.getInstance();
-    const playerRepo = new PlayerRepository(db);
+    const playerRepo = new PlayerRepository();
 
     try {
       // Check if player has games
@@ -100,8 +96,7 @@ export function registerPlayerHandlers() {
    * Returns the number of games
    */
   ipcMain.handle('player:countGames', async (_event, playerId: number): Promise<number> => {
-    const db = DatabaseService.getInstance();
-    const playerRepo = new PlayerRepository(db);
+    const playerRepo = new PlayerRepository();
 
     try {
       return playerRepo.countGames(playerId);

@@ -147,4 +147,138 @@ export class GameRepository {
     `);
     return stmt.all(gameId) as Array<{ id: number; nom: string; equipe: number }>;
   }
+
+  /**
+   * Compter le nombre de manches d'une partie
+   */
+  countRounds(gameId: number): number {
+    const stmt = this.db.prepare(`
+      SELECT COUNT(*) as count
+      FROM manches
+      WHERE partie_id = ?
+    `);
+    const result = stmt.get(gameId) as { count: number };
+    return result.count;
+  }
+
+  /**
+   * Find games with filters and sorting
+   */
+  findWithFilters(filters: {
+    dateFrom?: string;
+    dateTo?: string;
+    playerId?: number;
+    mode?: string;
+    sortBy?: 'date' | 'duration' | 'rounds';
+    sortOrder?: 'asc' | 'desc';
+    limit?: number;
+    offset?: number;
+  }): Game[] {
+    const conditions: string[] = [];
+    const params: any[] = [];
+
+    // Date filters
+    if (filters.dateFrom) {
+      conditions.push('p.date >= ?');
+      params.push(filters.dateFrom);
+    }
+    if (filters.dateTo) {
+      conditions.push('p.date <= ?');
+      params.push(filters.dateTo);
+    }
+
+    // Player filter
+    if (filters.playerId) {
+      conditions.push('EXISTS (SELECT 1 FROM parties_joueurs pj WHERE pj.partie_id = p.id AND pj.joueur_id = ?)');
+      params.push(filters.playerId);
+    }
+
+    // Mode filter
+    if (filters.mode) {
+      conditions.push('p.mode = ?');
+      params.push(filters.mode);
+    }
+
+    // Build WHERE clause
+    const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+
+    // Sorting
+    let orderBy = 'ORDER BY p.date DESC';
+    if (filters.sortBy === 'duration') {
+      orderBy = `ORDER BY p.duree_minutes ${filters.sortOrder === 'asc' ? 'ASC' : 'DESC'}`;
+    } else if (filters.sortBy === 'rounds') {
+      orderBy = `ORDER BY (SELECT COUNT(*) FROM manches WHERE partie_id = p.id) ${filters.sortOrder === 'asc' ? 'ASC' : 'DESC'}`;
+    } else if (filters.sortBy === 'date') {
+      orderBy = `ORDER BY p.date ${filters.sortOrder === 'asc' ? 'ASC' : 'DESC'}`;
+    }
+
+    // Pagination
+    const limitClause = filters.limit ? `LIMIT ${filters.limit}` : '';
+    const offsetClause = filters.offset ? `OFFSET ${filters.offset}` : '';
+
+    const query = `
+      SELECT p.*
+      FROM parties p
+      ${whereClause}
+      ${orderBy}
+      ${limitClause}
+      ${offsetClause}
+    `;
+
+    const stmt = this.db.prepare(query);
+    const games = stmt.all(...params) as any[];
+
+    return games.map((game) => ({
+      ...game,
+      terminee: Boolean(game.terminee),
+    }));
+  }
+
+  /**
+   * Count games with filters (for pagination)
+   */
+  countWithFilters(filters: {
+    dateFrom?: string;
+    dateTo?: string;
+    playerId?: number;
+    mode?: string;
+  }): number {
+    const conditions: string[] = [];
+    const params: any[] = [];
+
+    // Date filters
+    if (filters.dateFrom) {
+      conditions.push('p.date >= ?');
+      params.push(filters.dateFrom);
+    }
+    if (filters.dateTo) {
+      conditions.push('p.date <= ?');
+      params.push(filters.dateTo);
+    }
+
+    // Player filter
+    if (filters.playerId) {
+      conditions.push('EXISTS (SELECT 1 FROM parties_joueurs pj WHERE pj.partie_id = p.id AND pj.joueur_id = ?)');
+      params.push(filters.playerId);
+    }
+
+    // Mode filter
+    if (filters.mode) {
+      conditions.push('p.mode = ?');
+      params.push(filters.mode);
+    }
+
+    // Build WHERE clause
+    const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+
+    const query = `
+      SELECT COUNT(*) as count
+      FROM parties p
+      ${whereClause}
+    `;
+
+    const stmt = this.db.prepare(query);
+    const result = stmt.get(...params) as { count: number };
+    return result.count;
+  }
 }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FaArrowLeft, FaCheck, FaTimes, FaTrash, FaUsers } from 'react-icons/fa';
+import { FaArrowLeft, FaTimes, FaTrash, FaUsers } from 'react-icons/fa';
 import type { Game, Round, TrumpSuit, GameData } from '../../shared/types';
 import {
   validateRoundForm,
@@ -568,7 +568,7 @@ const GamePage: React.FC = () => {
                 {validationErrors.general ? (
                   <FaTimes className="text-red-600" />
                 ) : pointsTeam1 !== '' && (entryMode === '1_team' || pointsTeam2 !== '') ? (
-                  <FaCheck className="text-green-600" />
+                  <span className="text-green-600">✓</span>
                 ) : null}
                 {validationErrors.general && (
                   <span className="text-red-500 text-xs ml-2">{validationErrors.general}</span>
@@ -680,7 +680,7 @@ const GamePage: React.FC = () => {
                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 }`}
               >
-                <FaCheck />
+                <span>✓</span>
                 <span>{isSubmitting ? 'Validation...' : 'Valider la manche'}</span>
               </button>
             </div>

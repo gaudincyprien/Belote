@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FaArrowLeft, FaTrophy, FaClock, FaChartBar } from 'react-icons/fa';
+import { FaArrowLeft, FaChartBar } from 'react-icons/fa';
 import type { Game, Round, GameData, FinalizeGameParams } from '../../shared/types';
 import { calculateGameStatistics } from '../utils/gameStatistics';
 
@@ -128,7 +128,7 @@ const GameResultsPage: React.FC = () => {
               <FaArrowLeft />
               <span>Retour au menu</span>
             </button>
-            <FaTrophy className="text-4xl text-yellow-500" />
+            <span className="text-4xl">🏆</span>
           </div>
 
           <h1 className="text-3xl font-bold text-center text-gray-800 mb-4">
@@ -160,7 +160,7 @@ const GameResultsPage: React.FC = () => {
               <span>Manches : {statistics.totalRounds}</span>
             </div>
             <div className="flex items-center gap-2">
-              <FaClock />
+              <span>⏱️</span>
               <span>Durée : {statistics.duration} min</span>
             </div>
           </div>

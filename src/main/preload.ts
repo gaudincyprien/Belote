@@ -2,7 +2,7 @@
 // https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
 
 import { contextBridge, ipcRenderer } from 'electron';
-import type { CreateGameParams, CreateRoundParams, FinalizeGameParams } from '../shared/types';
+import type { CreateGameParams, CreateRoundParams, FinalizeGameParams, GameFilters } from '../shared/types';
 
 // Expose protected methods that allow the renderer process to use
 // the ipcRenderer without exposing the entire object
@@ -20,4 +20,9 @@ contextBridge.exposeInMainWorld('electron', {
   updatePlayer: (id: number, nom: string) => ipcRenderer.invoke('player:update', id, nom),
   deletePlayer: (id: number) => ipcRenderer.invoke('player:delete', id),
   countPlayerGames: (playerId: number) => ipcRenderer.invoke('player:countGames', playerId),
+
+  // History management
+  listGames: (filters?: GameFilters) => ipcRenderer.invoke('history:listGames', filters),
+  countGameRounds: (gameId: number) => ipcRenderer.invoke('history:countRounds', gameId),
+  deleteGame: (gameId: number) => ipcRenderer.invoke('history:deleteGame', gameId),
 });
