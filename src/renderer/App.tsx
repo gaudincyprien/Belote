@@ -5,6 +5,7 @@ import NewGamePage from './pages/NewGamePage';
 import GamePage from './pages/GamePage';
 import GameResultsPage from './pages/GameResultsPage';
 import SettingsPage from './pages/SettingsPage';
+import PlayersPage from './pages/PlayersPage';
 
 const App: React.FC = () => {
   return (
@@ -15,6 +16,7 @@ const App: React.FC = () => {
         <Route path="/game/:gameId" element={<GamePage />} />
         <Route path="/game/:gameId/results" element={<GameResultsPage />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/players" element={<PlayersPage />} />
       </Routes>
     </Router>
   );

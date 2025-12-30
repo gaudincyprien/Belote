@@ -5,7 +5,8 @@ import {
   FaHistory,
   FaChartBar,
   FaCog,
-  FaTimes
+  FaTimes,
+  FaUsers
 } from 'react-icons/fa';
 
 const HomePage: React.FC = () => {
@@ -43,6 +44,15 @@ const HomePage: React.FC = () => {
           >
             <FaPlus className="text-xl" />
             <span className="text-lg">Nouvelle partie</span>
+          </button>
+
+          {/* Bouton Gestion des joueurs */}
+          <button
+            onClick={() => navigate('/players')}
+            className="w-full flex items-center justify-center gap-3 bg-green-600 hover:bg-green-700 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 hover:shadow-lg"
+          >
+            <FaUsers className="text-xl" />
+            <span className="text-lg">Gestion des joueurs</span>
           </button>
 
           {/* Bouton Historique (désactivé) */}
