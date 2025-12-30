@@ -84,6 +84,11 @@ export interface ElectronAPI {
 
   // Shortcuts
   toggleShortcuts?: (enabled: boolean) => Promise<void>;
+
+  // Export/Import
+  exportData?: () => Promise<ExportResult>;
+  selectImportFile?: () => Promise<ImportFileResult>;
+  importData?: (filePath: string, options: { mode: 'merge' | 'replace' }) => Promise<ImportResult>;
 }
 
 declare global {
@@ -380,4 +385,36 @@ export interface AppSettings {
 
   // Language
   langue: string;
+}
+
+// Export/Import Types
+export interface ImportSummary {
+  joueurs: { added: number; skipped: number; updated: number };
+  parties: { added: number };
+  manches: { added: number };
+  parties_joueurs: { added: number };
+}
+
+export interface ImportPreview {
+  joueurs: number;
+  parties: number;
+  manches: number;
+}
+
+export interface ExportResult {
+  success: boolean;
+  canceled?: boolean;
+  filePath?: string;
+}
+
+export interface ImportFileResult {
+  success: boolean;
+  canceled?: boolean;
+  filePath?: string;
+  preview?: ImportPreview;
+}
+
+export interface ImportResult {
+  success: boolean;
+  summary?: ImportSummary;
 }

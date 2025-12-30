@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaArrowLeft, FaCheck, FaRedo, FaCog } from 'react-icons/fa';
-import type { AppSettings } from '../../shared/types';
+import { FaArrowLeft, FaCheck, FaRedo, FaCog, FaDownload, FaUpload } from 'react-icons/fa';
+import type { AppSettings, ImportSummary } from '../../shared/types';
 
 const SettingsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -95,6 +95,66 @@ const SettingsPage: React.FC = () => {
     } catch (error) {
       console.error('Error resetting settings:', error);
       alert('Erreur lors de la réinitialisation');
+    }
+  };
+
+  const handleExport = async () => {
+    try {
+      if (window.electron?.exportData) {
+        const result = await window.electron.exportData();
+        if (result.success && !result.canceled) {
+          alert(`Données exportées avec succès vers:\n${result.filePath}`);
+        }
+      }
+    } catch (error) {
+      console.error('Export error:', error);
+      alert(error instanceof Error ? error.message : 'Erreur lors de l\'export');
+    }
+  };
+
+  const handleImport = async () => {
+    try {
+      if (!window.electron?.selectImportFile || !window.electron?.importData) return;
+
+      // Select file and get preview
+      const fileResult = await window.electron.selectImportFile();
+      if (!fileResult.success || fileResult.canceled || !fileResult.filePath) {
+        return;
+      }
+
+      const preview = fileResult.preview;
+      if (!preview) return;
+
+      // Ask user for import mode
+      const message = `Fichier sélectionné contient:\n- ${preview.joueurs} joueur(s)\n- ${preview.parties} partie(s)\n- ${preview.manches} manche(s)\n\nChoisissez le mode d'import:\n\nOK = Fusionner (ajouter aux données existantes)\nAnnuler = Annuler l'import`;
+
+      const shouldMerge = confirm(message);
+      if (shouldMerge === null) return; // Canceled
+
+      const importMode: 'merge' | 'replace' = shouldMerge ? 'merge' : 'merge';
+
+      // If replace mode, ask for final confirmation
+      if (!shouldMerge) {
+        const replaceConfirm = confirm(
+          'ATTENTION: Le mode remplacement va SUPPRIMER toutes les données existantes!\n\nVoulez-vous vraiment continuer?'
+        );
+        if (!replaceConfirm) return;
+      }
+
+      // Perform import
+      const importResult = await window.electron.importData(fileResult.filePath, {
+        mode: importMode,
+      });
+
+      if (importResult.success && importResult.summary) {
+        const summary = importResult.summary as ImportSummary;
+        alert(
+          `Import réussi!\n\nJoueurs: ${summary.joueurs.added} ajouté(s), ${summary.joueurs.skipped} ignoré(s)\nParties: ${summary.parties.added} ajoutée(s)\nManches: ${summary.manches.added} ajoutée(s)`
+        );
+      }
+    } catch (error) {
+      console.error('Import error:', error);
+      alert(error instanceof Error ? error.message : 'Erreur lors de l\'import');
     }
   };
 
@@ -301,6 +361,22 @@ const SettingsPage: React.FC = () => {
             </div>
             <div>
               <p className="text-sm text-gray-600">Taille: {formatBytes(dbSize)}</p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={handleExport}
+                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+              >
+                <FaDownload />
+                <span>Exporter</span>
+              </button>
+              <button
+                onClick={handleImport}
+                className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+              >
+                <FaUpload />
+                <span>Importer</span>
+              </button>
             </div>
             <button
               onClick={handleResetAll}
