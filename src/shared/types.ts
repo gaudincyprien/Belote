@@ -71,6 +71,16 @@ export interface ElectronAPI {
   getTrumpStatistics?: () => Promise<TrumpStatistics[]>;
   getGlobalRecords?: () => Promise<GlobalRecords>;
   getPlayerStatistics?: (playerId: number) => Promise<PlayerStatistics>;
+
+  // Settings
+  getAllSettings?: () => Promise<AppSettings>;
+  getSetting?: <K extends keyof AppSettings>(key: K) => Promise<AppSettings[K]>;
+  setSetting?: <K extends keyof AppSettings>(key: K, value: AppSettings[K]) => Promise<void>;
+  updateSettings?: (settings: Partial<AppSettings>) => Promise<void>;
+  resetSetting?: <K extends keyof AppSettings>(key: K) => Promise<void>;
+  resetAllSettings?: () => Promise<void>;
+  getSettingsPath?: () => Promise<string>;
+  getSettingsSize?: () => Promise<number>;
 }
 
 declare global {
@@ -349,4 +359,22 @@ export interface WinEvolutionPoint {
   gameNumber: number; // game sequence number for this player
   winRate: number; // cumulative win rate at this point
   date: string;
+}
+
+// Application Settings
+export interface AppSettings {
+  // Game settings
+  seuilVictoire: number;
+  confirmationSuppression: boolean;
+  sonNotifications: boolean;
+
+  // Appearance settings
+  theme: 'light' | 'dark' | 'auto';
+  taillePolice: 'small' | 'medium' | 'large';
+
+  // Keyboard shortcuts
+  raccourcisActives: boolean;
+
+  // Language
+  langue: string;
 }

@@ -32,4 +32,14 @@ contextBridge.exposeInMainWorld('electron', {
   getTrumpStatistics: () => ipcRenderer.invoke('statistics:getTrumpStats'),
   getGlobalRecords: () => ipcRenderer.invoke('statistics:getRecords'),
   getPlayerStatistics: (playerId: number) => ipcRenderer.invoke('statistics:getPlayerStats', playerId),
+
+  // Settings
+  getAllSettings: () => ipcRenderer.invoke('settings:getAll'),
+  getSetting: (key: string) => ipcRenderer.invoke('settings:get', key),
+  setSetting: (key: string, value: unknown) => ipcRenderer.invoke('settings:set', key, value),
+  updateSettings: (settings: Record<string, unknown>) => ipcRenderer.invoke('settings:update', settings),
+  resetSetting: (key: string) => ipcRenderer.invoke('settings:reset', key),
+  resetAllSettings: () => ipcRenderer.invoke('settings:resetAll'),
+  getSettingsPath: () => ipcRenderer.invoke('settings:getPath'),
+  getSettingsSize: () => ipcRenderer.invoke('settings:getSize'),
 });
