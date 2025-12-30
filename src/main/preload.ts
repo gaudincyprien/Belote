@@ -45,6 +45,12 @@ contextBridge.exposeInMainWorld('electron', {
 
   // Shortcuts
   toggleShortcuts: (enabled: boolean) => ipcRenderer.invoke('shortcuts:toggle', enabled),
+
+  // Export/Import
+  exportData: () => ipcRenderer.invoke('exportImport:export'),
+  selectImportFile: () => ipcRenderer.invoke('exportImport:selectFile'),
+  importData: (filePath: string, options: { mode: 'merge' | 'replace' }) =>
+    ipcRenderer.invoke('exportImport:import', filePath, options),
 });
 
 // Listen for shortcut events from main process and dispatch them as custom events
