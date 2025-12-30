@@ -25,4 +25,10 @@ contextBridge.exposeInMainWorld('electron', {
   listGames: (filters?: GameFilters) => ipcRenderer.invoke('history:listGames', filters),
   countGameRounds: (gameId: number) => ipcRenderer.invoke('history:countRounds', gameId),
   deleteGame: (gameId: number) => ipcRenderer.invoke('history:deleteGame', gameId),
+
+  // Statistics
+  getGlobalStatistics: () => ipcRenderer.invoke('statistics:getGlobal'),
+  getPlayerRankings: () => ipcRenderer.invoke('statistics:getPlayerRankings'),
+  getTrumpStatistics: () => ipcRenderer.invoke('statistics:getTrumpStats'),
+  getGlobalRecords: () => ipcRenderer.invoke('statistics:getRecords'),
 });

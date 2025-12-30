@@ -5,3 +5,4 @@ export { DatabaseService } from './DatabaseService';
 export { PlayerRepository } from './PlayerRepository';
 export { GameRepository } from './GameRepository';
 export { RoundRepository } from './RoundRepository';
+export { StatisticsRepository } from './StatisticsRepository';

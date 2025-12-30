@@ -64,6 +64,12 @@ export interface ElectronAPI {
   listGames?: (filters?: GameFilters) => Promise<GameListResult>;
   countGameRounds?: (gameId: number) => Promise<number>;
   deleteGame?: (gameId: number) => Promise<boolean>;
+
+  // Statistics
+  getGlobalStatistics?: () => Promise<GlobalStatistics>;
+  getPlayerRankings?: () => Promise<PlayerRanking[]>;
+  getTrumpStatistics?: () => Promise<TrumpStatistics[]>;
+  getGlobalRecords?: () => Promise<GlobalRecords>;
 }
 
 declare global {
@@ -205,4 +211,70 @@ export interface GameStatistics {
 export interface FinalizeGameParams {
   gameId: number;
   forced: boolean; // true si manuel, false si auto (seuil atteint)
+}
+
+// Global Statistics (all games combined)
+export interface GlobalStatistics {
+  // General overview
+  totalGames: number;
+  totalRounds: number;
+  totalPlayTime: number; // in minutes
+  firstGameDate: string | null;
+  lastGameDate: string | null;
+  longestGame: {
+    gameId: number;
+    duration: number;
+    roundCount: number;
+  } | null;
+}
+
+// Player ranking
+export interface PlayerRanking {
+  playerId: number;
+  playerName: string;
+  gamesPlayed: number;
+  wins: number;
+  winRate: number; // percentage
+  rank: number;
+}
+
+// Trump statistics
+export interface TrumpStatistics {
+  trump: TrumpSuit;
+  frequency: number; // how many times this trump was played
+  percentage: number; // percentage of total rounds
+  successRate: number; // percentage of successful takes with this trump
+}
+
+// Global records
+export interface GlobalRecords {
+  bestRoundScore: {
+    gameId: number;
+    roundNumber: number;
+    playerName: string;
+    points: number;
+    trump: TrumpSuit;
+  } | null;
+  fastestGame: {
+    gameId: number;
+    duration: number;
+  } | null;
+  longestWinStreak: {
+    playerId: number;
+    playerName: string;
+    streakLength: number;
+  } | null;
+  bestDuo: {
+    player1Id: number;
+    player1Name: string;
+    player2Id: number;
+    player2Name: string;
+    gamesPlayed: number;
+    wins: number;
+    winRate: number;
+  } | null;
+  mostRoundsGame: {
+    gameId: number;
+    roundCount: number;
+  } | null;
 }

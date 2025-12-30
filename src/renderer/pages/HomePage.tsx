@@ -64,10 +64,10 @@ const HomePage: React.FC = () => {
             <span className="text-lg">Historique des parties</span>
           </button>
 
-          {/* Bouton Statistiques (désactivé) */}
+          {/* Bouton Statistiques */}
           <button
-            disabled
-            className="w-full flex items-center justify-center gap-3 bg-gray-300 text-gray-500 font-semibold py-4 px-6 rounded-xl cursor-not-allowed opacity-60"
+            onClick={() => navigate('/stats')}
+            className="w-full flex items-center justify-center gap-3 bg-orange-600 hover:bg-orange-700 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 hover:shadow-lg"
           >
             <FaChartBar className="text-xl" />
             <span className="text-lg">Statistiques</span>
