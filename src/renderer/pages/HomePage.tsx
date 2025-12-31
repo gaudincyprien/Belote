@@ -23,20 +23,20 @@ const HomePage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Logo/Titre */}
         <div className="text-center mb-8">
-          <h1 className="text-5xl font-bold text-indigo-600 mb-2">
+          <h1 className="text-5xl font-bold text-indigo-600 dark:text-indigo-400 mb-2">
             🎴 Belote Scorer
           </h1>
-          <p className="text-gray-600 text-lg">
+          <p className="text-gray-600 dark:text-gray-300 text-lg">
             Gérez vos parties de belote
           </p>
         </div>
 
         {/* Menu principal */}
-        <div className="bg-white rounded-2xl shadow-xl p-6 space-y-3">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 space-y-3">
           {/* Bouton Nouvelle partie */}
           <button
             onClick={handleNewGame}
@@ -76,7 +76,7 @@ const HomePage: React.FC = () => {
           {/* Bouton Paramètres */}
           <button
             onClick={() => navigate('/settings')}
-            className="w-full flex items-center justify-center gap-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-4 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 hover:shadow-md"
+            className="w-full flex items-center justify-center gap-3 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-semibold py-4 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 hover:shadow-md"
           >
             <FaCog className="text-xl" />
             <span className="text-lg">Paramètres</span>
@@ -85,7 +85,7 @@ const HomePage: React.FC = () => {
           {/* Bouton Quitter */}
           <button
             onClick={handleQuit}
-            className="w-full flex items-center justify-center gap-3 bg-red-500 hover:bg-red-600 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 hover:shadow-lg"
+            className="w-full flex items-center justify-center gap-3 bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 hover:shadow-lg"
           >
             <FaTimes className="text-xl" />
             <span className="text-lg">Quitter</span>
@@ -93,7 +93,7 @@ const HomePage: React.FC = () => {
         </div>
 
         {/* Footer */}
-        <div className="text-center mt-6 text-sm text-gray-500">
+        <div className="text-center mt-6 text-sm text-gray-500 dark:text-gray-400">
           Version 1.0.0
         </div>
       </div>

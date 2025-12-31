@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaArrowLeft, FaCheck, FaRedo, FaCog, FaDownload, FaUpload } from 'react-icons/fa';
+import { FaArrowLeft } from 'react-icons/fa';
+import { FaCheck, FaRotate as FaRedo, FaGear as FaCog, FaDownload, FaUpload } from 'react-icons/fa6';
 import type { AppSettings, ImportSummary } from '../../shared/types';
 
 const SettingsPage: React.FC = () => {
@@ -168,25 +169,25 @@ const SettingsPage: React.FC = () => {
 
   if (isLoading || !settings) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="text-xl text-gray-700">Chargement des paramètres...</div>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
+        <div className="text-xl text-gray-700 dark:text-gray-300">Chargement des paramètres...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 mb-6">
           <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold text-indigo-600 flex items-center gap-3">
+            <h1 className="text-3xl font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-3">
               <FaCog />
               <span>Paramètres</span>
             </h1>
             <button
               onClick={() => navigate('/')}
-              className="flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 px-4 rounded-lg transition-colors"
+              className="flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-700 dark:text-gray-300 font-semibold py-2 px-4 rounded-lg transition-colors"
             >
               <FaArrowLeft />
               <span>Retour</span>
@@ -195,13 +196,13 @@ const SettingsPage: React.FC = () => {
         </div>
 
         {/* Game Settings */}
-        <div className="bg-white rounded-xl shadow-md p-6 mb-6">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-6">
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
             🎮 Jeu
           </h2>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Seuil de victoire (points)
               </label>
               <input
@@ -211,7 +212,7 @@ const SettingsPage: React.FC = () => {
                 min="100"
                 max="10000"
                 step="100"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               />
               <p className="text-xs text-gray-500 mt-1">Entre 100 et 10000 points</p>
             </div>
@@ -222,9 +223,9 @@ const SettingsPage: React.FC = () => {
                 id="confirmationSuppression"
                 checked={settings.confirmationSuppression}
                 onChange={(e) => handleChange('confirmationSuppression', e.target.checked)}
-                className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                className="w-4 h-4 text-indigo-600 dark:text-indigo-400 border-gray-300 dark:border-gray-600 rounded focus:ring-indigo-500"
               />
-              <label htmlFor="confirmationSuppression" className="text-sm font-medium text-gray-700">
+              <label htmlFor="confirmationSuppression" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 Demander confirmation avant suppression
               </label>
             </div>
@@ -235,9 +236,9 @@ const SettingsPage: React.FC = () => {
                 id="sonNotifications"
                 checked={settings.sonNotifications}
                 onChange={(e) => handleChange('sonNotifications', e.target.checked)}
-                className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                className="w-4 h-4 text-indigo-600 dark:text-indigo-400 border-gray-300 dark:border-gray-600 rounded focus:ring-indigo-500"
               />
-              <label htmlFor="sonNotifications" className="text-sm font-medium text-gray-700">
+              <label htmlFor="sonNotifications" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 Son des notifications
               </label>
             </div>
@@ -245,13 +246,13 @@ const SettingsPage: React.FC = () => {
         </div>
 
         {/* Appearance Settings */}
-        <div className="bg-white rounded-xl shadow-md p-6 mb-6">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-6">
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
             🎨 Apparence
           </h2>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Thème</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Thème</label>
               <div className="flex gap-4">
                 {[
                   { value: 'light', label: 'Clair' },
@@ -265,16 +266,16 @@ const SettingsPage: React.FC = () => {
                       value={theme.value}
                       checked={settings.theme === theme.value}
                       onChange={(e) => handleChange('theme', e.target.value as AppSettings['theme'])}
-                      className="w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"
+                      className="w-4 h-4 text-indigo-600 dark:text-indigo-400 border-gray-300 dark:border-gray-600 focus:ring-indigo-500"
                     />
-                    <span className="text-sm font-medium text-gray-700">{theme.label}</span>
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{theme.label}</span>
                   </label>
                 ))}
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Taille de police</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Taille de police</label>
               <div className="flex gap-4">
                 {[
                   { value: 'small', label: 'Petit' },
@@ -290,9 +291,9 @@ const SettingsPage: React.FC = () => {
                       onChange={(e) =>
                         handleChange('taillePolice', e.target.value as AppSettings['taillePolice'])
                       }
-                      className="w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"
+                      className="w-4 h-4 text-indigo-600 dark:text-indigo-400 border-gray-300 dark:border-gray-600 focus:ring-indigo-500"
                     />
-                    <span className="text-sm font-medium text-gray-700">{size.label}</span>
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{size.label}</span>
                   </label>
                 ))}
               </div>
@@ -301,8 +302,8 @@ const SettingsPage: React.FC = () => {
         </div>
 
         {/* Keyboard Shortcuts */}
-        <div className="bg-white rounded-xl shadow-md p-6 mb-6">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-6">
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
             ⌨️ Raccourcis clavier
           </h2>
           <div className="flex items-center gap-3">
@@ -311,9 +312,9 @@ const SettingsPage: React.FC = () => {
               id="raccourcisActives"
               checked={settings.raccourcisActives}
               onChange={(e) => handleChange('raccourcisActives', e.target.checked)}
-              className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+              className="w-4 h-4 text-indigo-600 dark:text-indigo-400 border-gray-300 dark:border-gray-600 rounded focus:ring-indigo-500"
             />
-            <label htmlFor="raccourcisActives" className="text-sm font-medium text-gray-700">
+            <label htmlFor="raccourcisActives" className="text-sm font-medium text-gray-700 dark:text-gray-300">
               Activer les raccourcis clavier
             </label>
           </div>
@@ -323,8 +324,8 @@ const SettingsPage: React.FC = () => {
         </div>
 
         {/* Language */}
-        <div className="bg-white rounded-xl shadow-md p-6 mb-6">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-6">
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
             🌍 Langue
           </h2>
           <div className="flex gap-4">
@@ -339,28 +340,28 @@ const SettingsPage: React.FC = () => {
                   value={lang.value}
                   checked={settings.langue === lang.value}
                   onChange={(e) => handleChange('langue', e.target.value)}
-                  className="w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"
+                  className="w-4 h-4 text-indigo-600 dark:text-indigo-400 border-gray-300 dark:border-gray-600 focus:ring-indigo-500"
                 />
-                <span className="text-sm font-medium text-gray-700">{lang.label}</span>
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{lang.label}</span>
               </label>
             ))}
           </div>
         </div>
 
         {/* Data */}
-        <div className="bg-white rounded-xl shadow-md p-6 mb-6">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-6">
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
             💾 Données
           </h2>
           <div className="space-y-3">
             <div>
-              <p className="text-sm text-gray-600">Emplacement de la configuration:</p>
-              <p className="text-xs text-gray-500 font-mono bg-gray-50 p-2 rounded mt-1 break-all">
+              <p className="text-sm text-gray-600 dark:text-gray-400">Emplacement de la configuration:</p>
+              <p className="text-xs text-gray-500 font-mono bg-gray-50 dark:bg-gray-700 p-2 rounded mt-1 break-all">
                 {dbPath}
               </p>
             </div>
             <div>
-              <p className="text-sm text-gray-600">Taille: {formatBytes(dbSize)}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Taille: {formatBytes(dbSize)}</p>
             </div>
             <div className="flex gap-3">
               <button
@@ -390,11 +391,11 @@ const SettingsPage: React.FC = () => {
 
         {/* Save/Cancel Buttons */}
         {hasChanges && (
-          <div className="bg-white rounded-xl shadow-md p-6 flex gap-4 justify-end">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 flex gap-4 justify-end">
             <button
               onClick={handleCancel}
               disabled={isSaving}
-              className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition-colors disabled:opacity-50"
+              className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 dark:text-gray-300 font-semibold rounded-lg transition-colors disabled:opacity-50"
             >
               Annuler
             </button>

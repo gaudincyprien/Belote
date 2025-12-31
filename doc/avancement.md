@@ -683,6 +683,7 @@ Taux de réussite par atout :
 
 **Définition de "Done" :**
 - ✅ Page dédiée par joueur
+
 - ✅ Stats fiables et complètes
 - ✅ Graphiques lisibles
 - ✅ Calcul correct des partenaires (mode 4 joueurs)
