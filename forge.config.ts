@@ -14,13 +14,44 @@ import { rendererConfig } from './webpack.renderer.config';
 const config: ForgeConfig = {
   packagerConfig: {
     asar: true,
+    name: 'Belote Scorer',
+    executableName: 'belote-scorer',
+    icon: './build/icon',
+    appBundleId: 'com.belote.scorer',
+    appCategoryType: 'public.app-category.games',
   },
   rebuildConfig: {},
   makers: [
-    new MakerSquirrel({}),
+    new MakerSquirrel({
+      name: 'belote_scorer',
+      authors: 'Stade Lavallois TC',
+      description: 'Application de gestion des scores de Belote',
+      iconUrl: 'https://raw.githubusercontent.com/gaudincyprien/Belote/main/build/icon.ico',
+      setupIcon: './build/icon.ico',
+    }),
     new MakerZIP({}, ['darwin']),
-    new MakerRpm({}),
-    new MakerDeb({}),
+    new MakerRpm({
+      options: {
+        name: 'belote-scorer',
+        productName: 'Belote Scorer',
+        genericName: 'Belote Score Manager',
+        categories: ['Game'],
+        icon: './build/icon.png',
+      },
+    }),
+    new MakerDeb({
+      options: {
+        name: 'belote-scorer',
+        productName: 'Belote Scorer',
+        genericName: 'Belote Score Manager',
+        categories: ['Game'],
+        icon: './build/icon.png',
+        section: 'games',
+        priority: 'optional',
+        maintainer: 'Stade Lavallois TC <stadelavalloistc@gmail.com>',
+        homepage: 'https://github.com/gaudincyprien/Belote',
+      },
+    }),
   ],
   plugins: [
     new AutoUnpackNativesPlugin({}),
