@@ -20,7 +20,9 @@ const config: ForgeConfig = {
     appBundleId: 'com.belote.scorer',
     appCategoryType: 'public.app-category.games',
   },
-  rebuildConfig: {},
+  rebuildConfig: {
+    force: true,
+  },
   makers: [
     new MakerSquirrel({
       name: 'belote_scorer',
