@@ -1,28 +1,38 @@
-import { test, expect } from '@playwright/test';
-
-const BASE_URL = 'http://localhost:9000';
+import { test, expect, ElectronApplication, Page } from '@playwright/test';
+import { launchElectronApp, getFirstWindow, closeElectronApp } from './helpers/electron';
 
 test.describe('Player Management (CRUD)', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto(BASE_URL);
+  let electronApp: ElectronApplication;
+  let page: Page;
+
+  test.beforeAll(async () => {
+    electronApp = await launchElectronApp();
+    page = await getFirstWindow(electronApp);
+  });
+
+  test.afterAll(async () => {
+    await closeElectronApp(electronApp);
+  });
+
+  test.beforeEach(async () => {
     // Navigate to players page
     await page.getByRole('button', { name: /gestion des joueurs/i }).click();
     await page.waitForURL('**/players');
   });
 
-  test('should display players page', async ({ page }) => {
+  test('should display players page', async () => {
     await expect(page.getByText('Gestion des joueurs')).toBeVisible();
     await expect(page.getByPlaceholder('Rechercher un joueur...')).toBeVisible();
     await expect(page.getByRole('button', { name: /ajouter/i })).toBeVisible();
   });
 
-  test('should open add player modal', async ({ page }) => {
+  test('should open add player modal', async () => {
     await page.getByRole('button', { name: /ajouter/i }).click();
     await expect(page.getByText('Ajouter un joueur')).toBeVisible();
     await expect(page.getByPlaceholder('Entrez le nom...')).toBeVisible();
   });
 
-  test('should create a new player', async ({ page }) => {
+  test('should create a new player', async () => {
     // Open modal
     await page.getByRole('button', { name: /ajouter/i }).click();
 
@@ -37,7 +47,7 @@ test.describe('Player Management (CRUD)', () => {
     await expect(page.getByText(playerName)).toBeVisible();
   });
 
-  test('should validate player name minimum 2 characters', async ({ page }) => {
+  test('should validate player name minimum 2 characters', async () => {
     await page.getByRole('button', { name: /ajouter/i }).click();
 
     // Try single character
@@ -51,7 +61,7 @@ test.describe('Player Management (CRUD)', () => {
     await expect(page.getByText('Minimum 2 caractères')).toBeVisible();
   });
 
-  test('should validate player name maximum 30 characters', async ({ page }) => {
+  test('should validate player name maximum 30 characters', async () => {
     await page.getByRole('button', { name: /ajouter/i }).click();
 
     // Try 31 characters
@@ -66,7 +76,7 @@ test.describe('Player Management (CRUD)', () => {
     await expect(page.getByText('Maximum 30 caractères')).toBeVisible();
   });
 
-  test('should search for players', async ({ page }) => {
+  test('should search for players', async () => {
     // Create a test player first
     await page.getByRole('button', { name: /ajouter/i }).click();
     const playerName = 'SearchTest' + Date.now();
@@ -89,7 +99,7 @@ test.describe('Player Management (CRUD)', () => {
     await expect(page.getByText('Aucun joueur trouvé')).toBeVisible();
   });
 
-  test('should edit a player', async ({ page }) => {
+  test('should edit a player', async () => {
     // Create a player first
     await page.getByRole('button', { name: /ajouter/i }).click();
     const originalName = 'EditTest' + Date.now();
@@ -118,7 +128,7 @@ test.describe('Player Management (CRUD)', () => {
     await expect(page.getByText(originalName)).not.toBeVisible();
   });
 
-  test('should delete a player with no games', async ({ page }) => {
+  test('should delete a player with no games', async () => {
     // Create a player
     await page.getByRole('button', { name: /ajouter/i }).click();
     const playerName = 'DeleteTest' + Date.now();
@@ -138,7 +148,7 @@ test.describe('Player Management (CRUD)', () => {
     await expect(page.getByText(playerName)).not.toBeVisible();
   });
 
-  test('should show stats button as disabled', async ({ page }) => {
+  test('should show stats button as disabled', async () => {
     // Stats buttons should exist but be disabled
     const statsButtons = page.locator('[title="Disponible prochainement"]');
     const count = await statsButtons.count();
@@ -148,12 +158,12 @@ test.describe('Player Management (CRUD)', () => {
     }
   });
 
-  test('should navigate back to home', async ({ page }) => {
+  test('should navigate back to home', async () => {
     await page.getByRole('button', { name: /retour/i }).click();
     await expect(page.getByText('Gérez vos parties de belote')).toBeVisible();
   });
 
-  test('should close modal on cancel', async ({ page }) => {
+  test('should close modal on cancel', async () => {
     // Open add modal
     await page.getByRole('button', { name: /ajouter/i }).click();
     await expect(page.getByText('Ajouter un joueur')).toBeVisible();
@@ -165,7 +175,7 @@ test.describe('Player Management (CRUD)', () => {
     await expect(page.getByText('Ajouter un joueur')).not.toBeVisible();
   });
 
-  test('should show no players message when empty', async ({ page }) => {
+  test('should show no players message when empty', async () => {
     // If there are no players yet (might not be the case)
     const noPlayersText = page.getByText('Aucun joueur enregistré');
     const tableExists = await page.locator('table').count();
